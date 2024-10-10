@@ -1,0 +1,40 @@
+﻿<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Cadastro de Filho</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2 class="text-center">Cadastro de Filho</h2>
+        <form action="{{ url_for('cadastro_filho', usuario_id=usuario_id) }}" method="POST" class="needs-validation" novalidate>
+            <div class="mb-3">
+                <label for="nome_filho" class="form-label">Nome do Filho:</label>
+                <input type="text" class="form-control" id="nome_filho" name="nome_filho" required>
+                <div class="invalid-feedback">Por favor, insira o nome do filho.</div>
+            </div>
+
+            <div class="mb-3">
+                <label for="idade_filho" class="form-label">Idade:</label>
+                <input type="number" class="form-control" id="idade_filho" name="idade_filho" required>
+                <div class="invalid-feedback">Por favor, insira a idade do filho.</div>
+            </div>
+
+            <div class="mb-3">
+                <label>Deseja cadastrar outro filho?</label><br>
+                <input type="radio" id="cadastrar_outro_sim" name="cadastrar_outro" value="sim" checked>
+                <label for="cadastrar_outro_sim">Sim</label>
+                <input type="radio" id="cadastrar_outro_nao" name="cadastrar_outro" value="nao">
+                <label for="cadastrar_outro_nao">Não</label>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">Cadastrar Filho</button>
+        </form>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

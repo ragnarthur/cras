@@ -1,0 +1,55 @@
+﻿/* Customizações adicionais ao Bootstrap */
+body {
+    background-color: #f8f9fa;
+    font-family: 'Arial', sans-serif;
+    padding: 20px;
+}
+
+h2 {
+    color: #495057;
+    margin-bottom: 20px;
+}
+
+form {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+label {
+    margin-top: 10px;
+}
+
+button {
+    margin-top: 20px;
+}
+
+button.btn-primary {
+    background-color: #0d6efd;
+    border: none;
+}
+
+button.btn-primary:hover {
+    background-color: #0a58ca;
+}
+
+input:required {
+    border-color: #dc3545;
+}
+
+.alert {
+    display: none;
+}
+
+.alert-success {
+    display: block;
+    margin-top: 10px;
+    color: #155724;
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+    padding: 15px;
+    border-radius: 5px;
+}
