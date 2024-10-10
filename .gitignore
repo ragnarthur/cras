@@ -1,1 +1,29 @@
 ﻿.venv/
+
+# Ambiente virtual
+venv/
+
+# Arquivos de banco de dados
+*.db
+*.sqlite3
+
+# Arquivos de cache Python
+__pycache__/
+*.pyc
+
+# Arquivos de log
+*.log
+
+# Arquivos locais de configuração
+.env
+.env.local
+
+# Diretórios e arquivos temporários
+tmp/
+
+# Arquivos do macOS
+.DS_Store
+
+# Arquivos de IDE
+.vscode/
+.idea/

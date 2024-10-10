@@ -1,14 +1,37 @@
-﻿<!-- templates/dashboard.html -->
-{% extends "base.html" %}
+﻿{% extends "base.html" %}
 
 {% block title %}Dashboard - CRAS App{% endblock %}
 
 {% block content %}
-<h2 class="text-center">Dashboard</h2>
-<p class="text-center">Bem-vindo ao sistema do CRAS. Escolha uma ação abaixo:</p>
+<div class="container mt-5">
+    <div class="text-center mb-4">
+        <h2 class="fw-bold">Painel de Controle</h2>
+        <p class="lead">Bem-vindo ao sistema do CRAS. Utilize as opções abaixo para gerenciar o cadastro de usuários e realizar pesquisas no sistema.</p>
+    </div>
 
-<div class="d-grid gap-2">
-    <a href="{{ url_for('cadastro_usuario') }}" class="btn btn-primary">Cadastrar Usuário</a>
-    <a href="{{ url_for('pesquisar_usuario') }}" class="btn btn-secondary">Pesquisar Usuário</a>
+    <!-- Cards de Ações -->
+    <div class="row justify-content-center">
+        <!-- Card de Cadastrar Usuário -->
+        <div class="col-md-4">
+            <div class="card mb-4 shadow-sm border-0">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Cadastrar Usuário</h5>
+                    <p class="card-text">Adicione novos usuários ao sistema com todas as informações necessárias.</p>
+                    <a href="{{ url_for('cadastro_usuario') }}" class="btn btn-primary btn-lg w-100">Cadastrar Usuário</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card de Pesquisar Usuário -->
+        <div class="col-md-4">
+            <div class="card mb-4 shadow-sm border-0">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Pesquisar Usuário</h5>
+                    <p class="card-text">Encontre usuários já cadastrados no sistema de maneira rápida e eficiente.</p>
+                    <a href="{{ url_for('pesquisar_usuario') }}" class="btn btn-secondary btn-lg w-100">Pesquisar Usuário</a>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}

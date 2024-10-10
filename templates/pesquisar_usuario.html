@@ -1,34 +1,61 @@
-﻿<!-- templates/pesquisar_usuario.html -->
-{% extends "base.html" %}
+﻿{% extends "base.html" %}
 
 {% block title %}Pesquisar Usuário - CRAS App{% endblock %}
 
 {% block content %}
-<h2 class="text-center">Pesquisar Usuários</h2>
-<form action="{{ url_for('pesquisar_usuario') }}" method="POST" class="needs-validation" novalidate>
-    <div class="mb-3">
-        <label for="pesquisa" class="form-label">Nome ou Telefone:</label>
-        <input type="text" class="form-control" id="pesquisa" name="pesquisa" required>
-        <div class="invalid-feedback">Por favor, insira um termo de pesquisa.</div>
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Pesquisar Usuários</h2>
+
+    <!-- Formulário de pesquisa -->
+    <form action="{{ url_for('pesquisar_usuario') }}" method="POST" class="needs-validation" novalidate>
+        <div class="input-group mb-3">
+            <input type="text" class="form-control" id="pesquisa" name="pesquisa" placeholder="Digite o nome ou telefone" required>
+            <button type="submit" class="btn btn-primary">Pesquisar</button>
+            <div class="invalid-feedback">Por favor, insira um termo de pesquisa.</div>
+        </div>
+    </form>
+
+    <!-- Resultados da pesquisa -->
+    {% if usuarios %}
+    <h3 class="mt-5 text-center">Resultados da Pesquisa</h3>
+    <div class="row justify-content-center">
+        {% for usuario in usuarios %}
+        <div class="col-md-6">
+            <div class="card mb-4 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title text-uppercase">
+                        <i class="bi bi-person-fill"></i> <strong>{{ usuario['nome'] }}</strong>
+                    </h5>
+                    <p class="card-text text-uppercase">
+                        <i class="bi bi-telephone-fill"></i> <strong>TELEFONE:</strong> {{ usuario['telefone'] | format_telefone }}<br>
+                        <i class="bi bi-house-door-fill"></i> <strong>ENDEREÇO:</strong> {{ usuario['endereco'] }}<br>
+                        <i class="bi bi-wallet-fill"></i> <strong>BOLSA FAMÍLIA:</strong> {{ 'sim' if usuario['bolsa_familia'] == 'sim' else 'não' }}<br>
+                        <i class="bi bi-calendar-fill"></i> <strong>ÚLTIMA RETIRADA DA CESTA BÁSICA:</strong> {{ usuario['data_cesta'] | format_data }}
+                    </p>
+
+                    <!-- Exibir cônjuge se houver -->
+                    {% if usuario['conjuge_nome'] %}
+                    <p class="card-text text-uppercase">
+                        <i class="bi bi-heart-fill"></i> <strong>CÔNJUGE:</strong> {{ usuario['conjuge_nome'] }}
+                    </p>
+                    {% endif %}
+
+                    <!-- Exibir filhos se houver -->
+                    {% if usuario['filhos'] %}
+                    <p class="card-text text-uppercase">
+                        <i class="bi bi-people-fill"></i> <strong>FILHOS:</strong> 
+                        {% for filho in usuario['filhos'] %}
+                        {{ filho['nome'] }} - {{ filho['idade'] }} anos{% if not loop.last %}, {% endif %}
+                        {% endfor %}
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
     </div>
-
-    <button type="submit" class="btn btn-primary w-100">Pesquisar</button>
-</form>
-
-{% if usuarios %}
-<h3 class="mt-5">Resultados da Pesquisa</h3>
-<ul class="list-group">
-    {% for usuario in usuarios %}
-    <li class="list-group-item">
-        <strong>Nome:</strong> {{ usuario['nome'] }} <br>
-        <strong>Telefone:</strong> {{ usuario['telefone'] }} <br>
-        <strong>Endereço:</strong> {{ usuario['endereco'] }} <br>
-        <strong>Bolsa Família:</strong> {{ usuario['bolsa_familia'] }} <br>
-        <strong>Última data de retirada da cesta básica:</strong> {{ usuario['data_cesta'] }}
-    </li>
-    {% endfor %}
-</ul>
-{% elif request.method == 'POST' %}
-<p class="mt-3 text-center">Nenhum usuário encontrado.</p>
-{% endif %}
+    {% elif request.method == 'POST' %}
+    <p class="mt-3 text-center">Nenhum usuário encontrado.</p>
+    {% endif %}
+</div>
 {% endblock %}

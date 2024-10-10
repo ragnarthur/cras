@@ -1,5 +1,4 @@
-﻿/* static/styles.css */
-
+﻿/* === Navbar === */
 /* Ajuste do tamanho da fonte para os textos do navbar */
 .navbar-nav .nav-link, .navbar-brand, .navbar-text {
     font-size: 1.4rem; /* Aumenta um pouco o tamanho da fonte */
@@ -7,15 +6,51 @@
 
 /* Estilo personalizado para o botão de 'Sair' na navbar */
 .navbar-nav .nav-link.btn {
-    font-size: 0.875rem; /* Reduz o tamanho da fonte */
-    padding: 0.25rem 0.75rem; /* Reduz o padding interno */
-    border-radius: 0.25rem; /* Mantém o design arredondado */
-    line-height: 1.5; /* Garante uma boa proporção de altura */
+    font-size: 0.875rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 0.25rem;
+    line-height: 1.5;
 }
 
+/* === Cards do Dashboard === */
+.card {
+    border-radius: 0.5rem;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
 
+.card-body {
+    padding: 2rem;
+}
 
-/* Corpo da página */
+/* Título e texto dos cards */
+.card-title {
+    font-size: 1.6rem;
+    font-weight: 600;
+}
+
+.card-text {
+    font-size: 1.1rem;
+    color: #6c757d;
+}
+
+/* Botões grandes */
+.btn-lg {
+    padding: 0.75rem 1.25rem;
+    font-size: 1.3rem;
+}
+
+/* === Textos Centrais e Introduções === */
+/* Aumentar o tamanho da fonte da introdução */
+.text-center h2 {
+    font-size: 2rem;
+}
+
+.text-center p.lead {
+    font-size: 1.25rem;
+}
+
+/* === Corpo da Página === */
 body {
     background-color: #f8f9fa;
     font-family: 'Arial', sans-serif;
@@ -41,9 +76,11 @@ body {
     margin-bottom: 1.5rem !important;
 }
 
+/* === Validação de Formulários === */
 /* Estilo para feedback de validação */
 .invalid-feedback {
     display: none;
+    font-size: 1.2rem;
 }
 
 /* Exibir feedback de validação quando necessário */
@@ -52,16 +89,19 @@ body {
     display: block;
 }
 
-/* Estilo para os botões */
+/* === Botões === */
+/* Estilo para os botões primários */
 .btn-primary {
     background-color: #0d6efd;
     border: none;
+    padding: 0.5rem 1rem;
 }
 
 .btn-primary:hover {
     background-color: #0a58ca;
 }
 
+/* Estilo para os botões secundários */
 .btn-secondary {
     background-color: #6c757d;
     border: none;
@@ -71,6 +111,7 @@ body {
     background-color: #5a6268;
 }
 
+/* Botão de aviso */
 .btn-warning {
     background-color: #ffc107;
     border: none;
@@ -80,6 +121,7 @@ body {
     background-color: #e0a800;
 }
 
+/* Botão de perigo */
 .btn-danger {
     background-color: #dc3545;
     border: none;
@@ -89,31 +131,125 @@ body {
     background-color: #c82333;
 }
 
-/* Aumentando a fonte da card title */
-.card-title {
-    font-size: 1.25rem;
-    font-weight: bold;
-}
-
-/* Ajustando os switches */
+/* === Switches (Campos de escolha) === */
 .form-check-input {
     cursor: pointer;
-    transform: scale(1.2); /* Aumentar o tamanho do switch */
+    transform: scale(1.2); /* Aumenta o tamanho dos switches */
 }
 
 /* Customizando a cor do switch quando ativado */
 .form-check-input:checked {
-    background-color: #0d6efd; /* Cor primária do Bootstrap */
+    background-color: #0d6efd;
 }
 
+/* === Campos de Entrada === */
 /* Aumentando o tamanho dos campos de entrada */
 .form-control-lg {
     padding: 0.75rem 1rem;
     font-size: 1.125rem;
 }
 
-/* Estilos para o botão maior */
-.btn-lg {
-    font-size: 1.2rem;
-    padding: 0.75rem 1.25rem;
+/* Aumentar o tamanho da fonte dos inputs e selects */
+.form-control, .form-select, .form-check-input {
+    font-size: 1.125rem;
 }
+
+/* Garantir que todos os inputs de texto sejam exibidos em letras maiúsculas */
+input[type="text"] {
+    text-transform: uppercase;
+}
+
+/* Se você quiser garantir também no textarea ou outros tipos de inputs */
+textarea, input[type="text"], input[type="tel"], input[type="email"] {
+    text-transform: uppercase;
+}
+
+/* === Footer (Rodapé) === */
+footer {
+    background-color: #f1f1f1;
+    position: relative;
+    bottom: 0;
+    width: 100%;
+    text-align: center;
+    font-size: 0.9rem;
+    color: #6c757d;
+    padding: 1rem 0;
+}
+
+/* Garantir que o footer fique no final da página */
+html, body {
+    height: 100%;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+.container {
+    flex: 1;
+}
+
+/* === Campo de Pesquisa e Resultados === */
+/* Estilização do campo de pesquisa */
+.input-group {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.form-control {
+    font-size: 1.1rem;
+}
+
+/* Ícones dos resultados */
+.bi {
+    margin-right: 0.5rem;
+    color: #0d6efd;
+}
+
+/* Estilização dos cards de resultados da pesquisa */
+.card {
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Estilo para a seção de filhos */
+.list-group-item {
+    font-size: 1rem;
+    background-color: transparent; /* Remove o fundo branco para se misturar melhor com o card */
+    border: none; /* Remove as bordas */
+    padding-left: 0;
+}
+
+/* Título da seção de filhos */
+h6 {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+/* Aumentando a margem superior da seção de filhos */
+.list-group {
+    margin-top: 1rem;
+}
+
+
+/* === Resultados da Pesquisa === */
+/* Garantir que o texto dos resultados seja exibido em negrito e letras maiúsculas */
+.card-text strong {
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+/* Ícones dos resultados */
+.bi {
+    margin-right: 0.5rem;
+    color: #0d6efd;
+}
+
+/* Garantir que o texto do endereço completo seja exibido em maiúsculas */
+.card-text {
+    text-transform: uppercase;
+}
+
