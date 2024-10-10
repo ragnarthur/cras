@@ -1,5 +1,20 @@
 ﻿/* static/styles.css */
 
+/* Ajuste do tamanho da fonte para os textos do navbar */
+.navbar-nav .nav-link, .navbar-brand, .navbar-text {
+    font-size: 1.4rem; /* Aumenta um pouco o tamanho da fonte */
+}
+
+/* Estilo personalizado para o botão de 'Sair' na navbar */
+.navbar-nav .nav-link.btn {
+    font-size: 0.875rem; /* Reduz o tamanho da fonte */
+    padding: 0.25rem 0.75rem; /* Reduz o padding interno */
+    border-radius: 0.25rem; /* Mantém o design arredondado */
+    line-height: 1.5; /* Garante uma boa proporção de altura */
+}
+
+
+
 /* Corpo da página */
 body {
     background-color: #f8f9fa;
@@ -19,6 +34,11 @@ body {
 /* Espaçamento inferior */
 .mb-3 {
     margin-bottom: 1rem !important;
+}
+
+/* Novo espaçamento entre os grupos de entrada */
+.mb-4 {
+    margin-bottom: 1.5rem !important;
 }
 
 /* Estilo para feedback de validação */
@@ -69,7 +89,6 @@ body {
     background-color: #c82333;
 }
 
-
 /* Aumentando a fonte da card title */
 .card-title {
     font-size: 1.25rem;
@@ -79,9 +98,22 @@ body {
 /* Ajustando os switches */
 .form-check-input {
     cursor: pointer;
+    transform: scale(1.2); /* Aumentar o tamanho do switch */
 }
 
 /* Customizando a cor do switch quando ativado */
 .form-check-input:checked {
     background-color: #0d6efd; /* Cor primária do Bootstrap */
+}
+
+/* Aumentando o tamanho dos campos de entrada */
+.form-control-lg {
+    padding: 0.75rem 1rem;
+    font-size: 1.125rem;
+}
+
+/* Estilos para o botão maior */
+.btn-lg {
+    font-size: 1.2rem;
+    padding: 0.75rem 1.25rem;
 }
