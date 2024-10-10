@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, g
 import sqlite3
 
 app = Flask(__name__)
@@ -10,6 +10,18 @@ def connect_db():
     conn.row_factory = sqlite3.Row  # Permite acessar as colunas pelo nome
     return conn
 
+# Antes de cada requisição, abrir a conexão com o banco de dados
+@app.before_request
+def before_request():
+    g.db = connect_db()
+
+# Depois de cada requisição, fechar a conexão com o banco de dados
+@app.teardown_request
+def teardown_request(exception):
+    db = getattr(g, 'db', None)
+    if db is not None:
+        db.close()
+
 # Rota de login
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -17,19 +29,17 @@ def index():
         username = request.form['username']
         senha = request.form['password']
 
-        conn = connect_db()
-        cursor = conn.cursor()
+        cursor = g.db.cursor()
         cursor.execute("SELECT * FROM secretarias WHERE username = ? AND senha = ?", (username, senha))
         secretaria = cursor.fetchone()
-        conn.close()
 
         if secretaria:
             session['username'] = secretaria['username']
             session['is_admin'] = bool(secretaria['is_admin'])
             return redirect(url_for('dashboard'))
         else:
-            return "Usuário ou senha incorretos!"
-
+            return render_template('index.html', error="Usuário ou senha incorretos!")
+    
     return render_template('index.html')
 
 # Rota do dashboard
@@ -54,14 +64,12 @@ def cadastro_usuario():
         bolsa_familia = request.form['bolsa_familia']
         data_cesta = request.form['data_cesta']
 
-        conn = connect_db()
-        cursor = conn.cursor()
+        cursor = g.db.cursor()
         cursor.execute(
             "INSERT INTO usuarios (nome, endereco, telefone, filhos, conjuge, bolsa_familia, data_cesta) VALUES (?, ?, ?, ?, ?, ?, ?)",
             (nome, endereco, telefone, filhos, conjuge, bolsa_familia, data_cesta))
         usuario_id = cursor.lastrowid
-        conn.commit()
-        conn.close()
+        g.db.commit()
 
         if filhos == 'sim':
             return redirect(url_for('cadastro_filho', usuario_id=usuario_id))
@@ -81,16 +89,13 @@ def cadastro_filho(usuario_id):
     if request.method == 'POST':
         nome_filho = request.form['nome_filho']
         idade_filho = request.form['idade_filho']
+        cadastrar_outro = request.form.get('cadastrar_outro')
 
-        conn = connect_db()
-        cursor = conn.cursor()
+        cursor = g.db.cursor()
         cursor.execute("INSERT INTO filhos (nome, idade, usuario_id) VALUES (?, ?, ?)",
                        (nome_filho, idade_filho, usuario_id))
-        conn.commit()
-        conn.close()
+        g.db.commit()
 
-        # Perguntar se deseja cadastrar outro filho
-        cadastrar_outro = request.form.get('cadastrar_outro')
         if cadastrar_outro == 'sim':
             return redirect(url_for('cadastro_filho', usuario_id=usuario_id))
         else:
@@ -107,12 +112,10 @@ def cadastro_conjuge(usuario_id):
     if request.method == 'POST':
         nome_conjuge = request.form['nome_conjuge']
 
-        conn = connect_db()
-        cursor = conn.cursor()
+        cursor = g.db.cursor()
         cursor.execute("INSERT INTO conjuge (nome, usuario_id) VALUES (?, ?)",
                        (nome_conjuge, usuario_id))
-        conn.commit()
-        conn.close()
+        g.db.commit()
 
         return redirect(url_for('dashboard'))
 
@@ -130,15 +133,25 @@ def add_secretaria():
         senha = request.form['senha']
         is_admin = request.form.get('is_admin') == 'on'
 
-        conn = connect_db()
-        cursor = conn.cursor()
-        cursor.execute("INSERT INTO secretarias (nome, username, senha, is_admin) VALUES (?, ?, ?, ?)",
-                       (nome, username, senha, int(is_admin)))
-        conn.commit()
-        conn.close()
+        cursor = g.db.cursor()
+        try:
+            cursor.execute("INSERT INTO secretarias (nome, username, senha, is_admin) VALUES (?, ?, ?, ?)",
+                           (nome, username, senha, int(is_admin)))
+            g.db.commit()
+        except sqlite3.IntegrityError:
+            return render_template('add_secretaria.html', error="Nome de usuário já existe!")
+
         return redirect(url_for('dashboard'))
+
     return render_template('add_secretaria.html')
 
+# Rota para logout
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('index'))
+
+# Rota para pesquisar usuários
 @app.route('/pesquisar_usuario', methods=['GET', 'POST'])
 def pesquisar_usuario():
     if 'username' not in session:
@@ -147,19 +160,12 @@ def pesquisar_usuario():
     usuarios = []
     if request.method == 'POST':
         pesquisa = request.form['pesquisa']
-        conn = connect_db()
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM usuarios WHERE nome LIKE ? OR telefone LIKE ?", ('%' + pesquisa + '%', '%' + pesquisa + '%'))
+        cursor = g.db.cursor()
+        cursor.execute("SELECT * FROM usuarios WHERE nome LIKE ? OR telefone LIKE ?", 
+                       ('%' + pesquisa + '%', '%' + pesquisa + '%'))
         usuarios = cursor.fetchall()
-        conn.close()
 
     return render_template('pesquisar_usuario.html', usuarios=usuarios)
-
-# Rota de logout
-@app.route('/logout')
-def logout():
-    session.clear()
-    return redirect(url_for('index'))
 
 if __name__ == '__main__':
     app.run(debug=True)

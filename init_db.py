@@ -1,4 +1,5 @@
-﻿import sqlite3
+﻿# init_db.py
+import sqlite3
 
 conn = sqlite3.connect('database.db')
 cursor = conn.cursor()
@@ -36,6 +37,26 @@ CREATE TABLE IF NOT EXISTS conjuge (
     usuario_id INTEGER,
     FOREIGN KEY(usuario_id) REFERENCES usuarios(id)
 )
+''')
+
+# Criação da tabela de secretárias
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS secretarias (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nome TEXT NOT NULL,
+    username TEXT NOT NULL UNIQUE,
+    senha TEXT NOT NULL,
+    is_admin BOOLEAN NOT NULL CHECK (is_admin IN (0, 1))
+)
+''')
+
+# Inserção das secretárias com uma senha padrão e Maria Silva como administradora
+cursor.execute('''
+INSERT OR IGNORE INTO secretarias (nome, username, senha, is_admin) VALUES 
+('Maria Silva', 'maria', 'senha123', 1),
+('Roseane Vieira', 'roseane', 'senha123', 0),
+('Aline Resende', 'aline', 'senha123', 0),
+('Meire Castro', 'meire', 'senha123', 0)
 ''')
 
 conn.commit()
