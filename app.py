@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, session, g
-from datetime import datetime
+from datetime import datetime, timedelta
 import sqlite3
 
 app = Flask(__name__)
@@ -15,6 +15,18 @@ def connect_db():
 @app.before_request
 def before_request():
     g.db = connect_db()
+    # Aqui garantimos que a coluna 'observacoes' existe
+    alterar_tabela()
+
+# Função para garantir que a coluna 'observacoes' seja adicionada
+def alterar_tabela():
+    cursor = g.db.cursor()
+    try:
+        cursor.execute("ALTER TABLE usuarios ADD COLUMN observacoes TEXT")
+        g.db.commit()
+    except sqlite3.OperationalError:
+        # Se a coluna já existir, ignorar o erro
+        pass
 
 # Depois de cada requisição, fechar a conexão com o banco de dados
 @app.teardown_request
@@ -211,18 +223,31 @@ def editar_usuario(nome_usuario):
         telefone = request.form['telefone']
         bolsa_familia = request.form['bolsa_familia']
         data_cesta = request.form['data_cesta']
+        observacoes = request.form['observacoes']
+
+        # Calcular a próxima data de retirada (3 meses após a data_cesta)
+        if data_cesta:
+            data_proxima_retirada = datetime.strptime(data_cesta, '%Y-%m-%d') + timedelta(days=90)
+        else:
+            data_proxima_retirada = None
 
         cursor.execute("""
             UPDATE usuarios SET nome = ?, data_nascimento = ?, endereco = ?, telefone = ?, 
-            bolsa_familia = ?, data_cesta = ? WHERE nome = ?
+            bolsa_familia = ?, data_cesta = ?, observacoes = ? WHERE nome = ?
         """, (
             nome, data_nascimento, f"{rua}, {numero}, {bairro}, {cidade}", telefone,
-            bolsa_familia, data_cesta, nome_usuario
+            bolsa_familia, data_cesta, observacoes, nome_usuario
         ))
         g.db.commit()
         return redirect(url_for('pesquisar_usuario'))
 
-    return render_template('editar_usuario.html', usuario=usuario)
+    # Calcular a próxima data de retirada para exibir na ficha
+    if usuario['data_cesta']:
+        data_proxima_retirada = datetime.strptime(usuario['data_cesta'], '%Y-%m-%d') + timedelta(days=90)
+    else:
+        data_proxima_retirada = None
+
+    return render_template('editar_usuario.html', usuario=usuario, data_proxima_retirada=data_proxima_retirada)
 
 # Rota para logout
 @app.route('/logout')
