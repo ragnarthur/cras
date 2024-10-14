@@ -4,6 +4,18 @@
     font-size: 1.4rem; /* Aumenta um pouco o tamanho da fonte */
 }
 
+/* Campos de entrada com letras maiúsculas (usado nas rotas de cadastro) */
+.form-uppercase input[type="text"], 
+.form-uppercase input[type="tel"], 
+.form-uppercase input[type="email"] {
+    text-transform: uppercase;
+}
+
+/* Campos de entrada do login sem letras maiúsculas */
+input[type="text"], input[type="password"] {
+    text-transform: none;
+}
+
 /* Estilo personalizado para o botão de 'Sair' na navbar */
 .navbar-nav .nav-link.btn {
     font-size: 0.875rem;
@@ -154,14 +166,15 @@ body {
     font-size: 1.125rem;
 }
 
-/* Garantir que todos os inputs de texto sejam exibidos em letras maiúsculas */
-input[type="text"] {
+/* === Letras maiúsculas no cadastro === */
+/* Garantir que os inputs de texto no cadastro sejam exibidos em letras maiúsculas */
+.form-uppercase input[type="text"], .form-uppercase input[type="tel"], .form-uppercase input[type="email"] {
     text-transform: uppercase;
 }
 
-/* Se você quiser garantir também no textarea ou outros tipos de inputs */
-textarea, input[type="text"], input[type="tel"], input[type="email"] {
-    text-transform: uppercase;
+/* Exemplo de uso para garantir que campos de login não tenham letras maiúsculas */
+input[type="text"], input[type="password"] {
+    text-transform: none; /* Remove a transformação para maiúsculas */
 }
 
 /* === Footer (Rodapé) === */
@@ -252,4 +265,3 @@ h6 {
 .card-text {
     text-transform: uppercase;
 }
-

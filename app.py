@@ -23,12 +23,33 @@ def teardown_request(exception):
     if db is not None:
         db.close()
 
+@app.template_filter('format_telefone')
+def format_telefone(telefone):
+    telefone = ''.join([num for num in telefone if num.isdigit()])
+    if len(telefone) == 11:
+        return f"({telefone[:2]}) {telefone[2:7]}-{telefone[7:]}"
+    elif len(telefone) == 10:
+        return f"({telefone[:2]}) {telefone[2:6]}-{telefone[6:]}"
+    else:
+        return telefone
+    
+
+@app.template_filter('format_data')
+def format_data(data_str):
+    try:
+        data = datetime.strptime(data_str, '%Y-%m-%d')
+        return data.strftime('%d/%m/%Y')
+    except ValueError:
+        return data_str
+
+
+
 # Rota de login
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
-        username = request.form['username']
-        senha = request.form['password']
+        username = request.form.get('username')
+        senha = request.form.get('password')
 
         cursor = g.db.cursor()
         cursor.execute("SELECT * FROM secretarias WHERE username = ? AND senha = ?", (username, senha))
@@ -58,11 +79,12 @@ def cadastro_usuario():
 
     if request.method == 'POST':
         nome = request.form['nome']
+        data_nascimento = request.form['data_nascimento']
         rua = request.form['rua']
         numero = request.form['numero']
         bairro = request.form['bairro']
         cidade = request.form['cidade']
-        endereco = f"{rua}, {numero}, {bairro}, {cidade}"  # Concatenando os campos de endereço
+        endereco = f"{rua}, {numero}, {bairro}, {cidade}"
         telefone = request.form['telefone']
         filhos = request.form.get('filhos', 'não')
         conjuge = request.form.get('conjuge', 'não')
@@ -71,15 +93,14 @@ def cadastro_usuario():
 
         cursor = g.db.cursor()
         cursor.execute(
-            "INSERT INTO usuarios (nome, endereco, telefone, filhos, conjuge, bolsa_familia, data_cesta) VALUES (?, ?, ?, ?, ?, ?, ?)",
-            (nome, endereco, telefone, filhos, conjuge, bolsa_familia, data_cesta)
+            "INSERT INTO usuarios (nome, data_nascimento, endereco, telefone, filhos, conjuge, bolsa_familia, data_cesta) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            (nome, data_nascimento, endereco, telefone, filhos, conjuge, bolsa_familia, data_cesta)
         )
-        usuario_id = cursor.lastrowid  # Armazena o ID do novo usuário
+        usuario_id = cursor.lastrowid  # Pegamos o ID do usuário recém-criado
         g.db.commit()
 
-        # Lógica de redirecionamento: Se tem filhos, vai para o cadastro de filhos. Depois de filhos, vai para cônjuge se necessário.
+        # Redirecionamento condicional
         if filhos == 'sim':
-            # Redireciona para o cadastro de filhos e após cadastro de filhos vai para cônjuge, se aplicável
             return redirect(url_for('cadastro_filho', usuario_id=usuario_id))
         elif conjuge == 'sim':
             return redirect(url_for('cadastro_conjuge', usuario_id=usuario_id))
@@ -88,36 +109,38 @@ def cadastro_usuario():
 
     return render_template('cadastro_usuario.html')
 
-# Rota para cadastro de filho
 @app.route('/cadastro_filho/<int:usuario_id>', methods=['GET', 'POST'])
 def cadastro_filho(usuario_id):
     if 'username' not in session:
         return redirect(url_for('index'))
 
+    # Busca o status de "conjuge" do usuário
+    cursor = g.db.cursor()
+    cursor.execute("SELECT conjuge FROM usuarios WHERE id = ?", (usuario_id,))
+    usuario = cursor.fetchone()
+
     if request.method == 'POST':
         nome_filho = request.form['nome_filho']
         idade_filho = request.form['idade_filho']
+        data_nascimento_filho = request.form['data_nascimento_filho']
         cadastrar_outro = request.form.get('cadastrar_outro')
 
-        cursor = g.db.cursor()
-        cursor.execute("INSERT INTO filhos (nome, idade, usuario_id) VALUES (?, ?, ?)",
-                       (nome_filho, idade_filho, usuario_id))
+        cursor.execute("INSERT INTO filhos (nome, idade, data_nascimento, usuario_id) VALUES (?, ?, ?, ?)",
+                       (nome_filho, idade_filho, data_nascimento_filho, usuario_id))
         g.db.commit()
 
         if cadastrar_outro == 'sim':
+            # Redireciona para o cadastro de outro filho
             return redirect(url_for('cadastro_filho', usuario_id=usuario_id))
+        elif usuario['conjuge'] == 'sim':
+            # Se o cônjuge está marcado, redireciona para o cadastro de cônjuge
+            return redirect(url_for('cadastro_conjuge', usuario_id=usuario_id))
         else:
-            # Após cadastrar o(s) filho(s), verificar se tem cônjuge. Se sim, redirecionar para o cadastro de cônjuge.
-            cursor.execute("SELECT conjuge FROM usuarios WHERE id = ?", (usuario_id,))
-            conjuge = cursor.fetchone()['conjuge']
-            if conjuge == 'sim':
-                return redirect(url_for('cadastro_conjuge', usuario_id=usuario_id))
-            else:
-                return redirect(url_for('dashboard'))
+            # Caso contrário, vai para o dashboard
+            return redirect(url_for('dashboard'))
 
     return render_template('cadastro_filho.html', usuario_id=usuario_id)
 
-# Rota para cadastro de cônjuge
 @app.route('/cadastro_conjuge/<int:usuario_id>', methods=['GET', 'POST'])
 def cadastro_conjuge(usuario_id):
     if 'username' not in session:
@@ -125,15 +148,87 @@ def cadastro_conjuge(usuario_id):
 
     if request.method == 'POST':
         nome_conjuge = request.form['nome_conjuge']
+        data_nascimento_conjuge = request.form['data_nascimento_conjuge']
 
         cursor = g.db.cursor()
-        cursor.execute("INSERT INTO conjuge (nome, usuario_id) VALUES (?, ?)",
-                       (nome_conjuge, usuario_id))
+        cursor.execute("INSERT INTO conjuge (nome, data_nascimento, usuario_id) VALUES (?, ?, ?)",
+                       (nome_conjuge, data_nascimento_conjuge, usuario_id))
         g.db.commit()
 
         return redirect(url_for('dashboard'))
 
     return render_template('cadastro_conjuge.html', usuario_id=usuario_id)
+
+
+# Rota para pesquisar usuários
+@app.route('/pesquisar_usuario', methods=['GET', 'POST'])
+def pesquisar_usuario():
+    if 'username' not in session:
+        return redirect(url_for('index'))
+
+    usuarios = []
+    if request.method == 'POST':
+        pesquisa = request.form['pesquisa']
+        cursor = g.db.cursor()
+        cursor.execute("SELECT * FROM usuarios WHERE nome LIKE ? OR telefone LIKE ?", 
+                       ('%' + pesquisa + '%', '%' + pesquisa + '%'))
+        usuarios_rows = cursor.fetchall()
+
+        for usuario_row in usuarios_rows:
+            usuario = dict(usuario_row)
+            usuario_id = usuario['id']
+
+            cursor.execute("SELECT nome, idade, data_nascimento FROM filhos WHERE usuario_id = ?", (usuario_id,))
+            filhos = cursor.fetchall()
+            usuario['filhos'] = [{"nome": filho['nome'].upper(), "idade": filho['idade'], "data_nascimento": filho['data_nascimento']} for filho in filhos]
+
+            cursor.execute("SELECT nome, data_nascimento FROM conjuge WHERE usuario_id = ?", (usuario_id,))
+            conjuge = cursor.fetchone()
+            usuario['conjuge_nome'] = conjuge['nome'].upper() if conjuge else None
+            usuario['conjuge_data_nascimento'] = conjuge['data_nascimento'] if conjuge else None
+
+            usuarios.append(usuario)
+
+    return render_template('pesquisar_usuario.html', usuarios=usuarios)
+
+# Rota para editar usuários
+@app.route('/editar_usuario/<nome_usuario>', methods=['GET', 'POST'])
+def editar_usuario(nome_usuario):
+    if 'username' not in session:
+        return redirect(url_for('index'))
+
+    cursor = g.db.cursor()
+    cursor.execute("SELECT * FROM usuarios WHERE nome = ?", (nome_usuario,))
+    usuario = cursor.fetchone()
+
+    if request.method == 'POST':
+        nome = request.form['nome']
+        data_nascimento = request.form['data_nascimento']
+        rua = request.form['rua']
+        numero = request.form['numero']
+        bairro = request.form['bairro']
+        cidade = request.form['cidade']
+        telefone = request.form['telefone']
+        bolsa_familia = request.form['bolsa_familia']
+        data_cesta = request.form['data_cesta']
+
+        cursor.execute("""
+            UPDATE usuarios SET nome = ?, data_nascimento = ?, endereco = ?, telefone = ?, 
+            bolsa_familia = ?, data_cesta = ? WHERE nome = ?
+        """, (
+            nome, data_nascimento, f"{rua}, {numero}, {bairro}, {cidade}", telefone,
+            bolsa_familia, data_cesta, nome_usuario
+        ))
+        g.db.commit()
+        return redirect(url_for('pesquisar_usuario'))
+
+    return render_template('editar_usuario.html', usuario=usuario)
+
+# Rota para logout
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('index'))
 
 # Rota para adicionar novas secretárias (apenas administradores)
 @app.route('/admin/add_secretaria', methods=['GET', 'POST'])
@@ -159,72 +254,6 @@ def add_secretaria():
 
     return render_template('add_secretaria.html')
 
-@app.template_filter('format_telefone')
-def format_telefone(telefone):
-    # Remove tudo que não for número
-    telefone = ''.join([num for num in telefone if num.isdigit()])
-    # Formata para o padrão (XX)XXXXX-XXXX
-    if len(telefone) == 11:
-        return f"({telefone[:2]}) {telefone[2:7]}-{telefone[7:]}"
-    elif len(telefone) == 10:
-        return f"({telefone[:2]}) {telefone[2:6]}-{telefone[6:]}"
-    else:
-        return telefone
-
-# Filtro para formatar a data no formato DD/MM/AAAA
-@app.template_filter('format_data')
-def format_data(data_str):
-    try:
-        # Tentar converter a string de data para um objeto datetime
-        data = datetime.strptime(data_str, '%Y-%m-%d')
-        # Retornar a data no formato DD/MM/AAAA
-        return data.strftime('%d/%m/%Y')
-    except ValueError:
-        return data_str  # Se houver erro, retornar a string original
-
-# Rota para logout
-@app.route('/logout')
-def logout():
-    session.clear()
-    return redirect(url_for('index'))
-
-# Rota para pesquisar usuários
-@app.route('/pesquisar_usuario', methods=['GET', 'POST'])
-def pesquisar_usuario():
-    if 'username' not in session:
-        return redirect(url_for('index'))
-
-    usuarios = []
-    if request.method == 'POST':
-        pesquisa = request.form['pesquisa']
-        cursor = g.db.cursor()
-
-        # Pesquisa o usuário baseado no nome ou telefone
-        cursor.execute("SELECT * FROM usuarios WHERE nome LIKE ? OR telefone LIKE ?", 
-                       ('%' + pesquisa + '%', '%' + pesquisa + '%'))
-        usuarios_rows = cursor.fetchall()
-
-        # Converta cada resultado para um dicionário e adicione informações extras
-        for usuario_row in usuarios_rows:
-            usuario = dict(usuario_row)  # Converte o sqlite3.Row para dict
-            
-            usuario_id = usuario['id']
-
-            # Buscar filhos do usuário
-            cursor.execute("SELECT nome, idade FROM filhos WHERE usuario_id = ?", (usuario_id,))
-            filhos = cursor.fetchall()
-            # Forçar nome dos filhos para uppercase
-            usuario['filhos'] = [{"nome": filho['nome'].upper(), "idade": filho['idade']} for filho in filhos]
-
-            # Buscar cônjuge do usuário
-            cursor.execute("SELECT nome FROM conjuge WHERE usuario_id = ?", (usuario_id,))
-            conjuge = cursor.fetchone()
-            # Forçar nome do cônjuge para uppercase se existir
-            usuario['conjuge_nome'] = conjuge['nome'].upper() if conjuge else None
-
-            usuarios.append(usuario)
-
-    return render_template('pesquisar_usuario.html', usuarios=usuarios)
 
 
 if __name__ == '__main__':

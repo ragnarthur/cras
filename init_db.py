@@ -1,5 +1,4 @@
-﻿# init_db.py
-import sqlite3
+﻿import sqlite3
 
 conn = sqlite3.connect('database.db')
 cursor = conn.cursor()
@@ -14,6 +13,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
     filhos TEXT,
     conjuge TEXT,
     bolsa_familia TEXT NOT NULL,
+    data_nascimento DATE,  -- Adicionado campo para data de nascimento
     data_cesta DATE
 )
 ''')
@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS filhos (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     nome TEXT NOT NULL,
     idade INTEGER NOT NULL,
+    data_nascimento DATE,  -- Adicionado campo para data de nascimento
     usuario_id INTEGER,
     FOREIGN KEY(usuario_id) REFERENCES usuarios(id)
 )
@@ -34,10 +35,26 @@ cursor.execute('''
 CREATE TABLE IF NOT EXISTS conjuge (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     nome TEXT NOT NULL,
+    data_nascimento DATE,  -- Adicionado campo para data de nascimento
     usuario_id INTEGER,
     FOREIGN KEY(usuario_id) REFERENCES usuarios(id)
 )
 ''')
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS usuarios (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nome TEXT NOT NULL,
+    endereco TEXT NOT NULL,
+    telefone TEXT NOT NULL,
+    filhos TEXT,
+    conjuge TEXT,
+    bolsa_familia TEXT NOT NULL,
+    data_nascimento DATE,
+    data_cesta DATE,
+    observacoes_visita TEXT
+)
+''')
+
 
 # Criação da tabela de secretárias
 cursor.execute('''
@@ -53,10 +70,10 @@ CREATE TABLE IF NOT EXISTS secretarias (
 # Inserção das secretárias com uma senha padrão e Maria Silva como administradora
 cursor.execute('''
 INSERT OR IGNORE INTO secretarias (nome, username, senha, is_admin) VALUES 
-('Maria Silva', 'maria', 'senha123', 1),
-('Roseane Vieira', 'roseane', 'senha123', 0),
-('Aline Resende', 'aline', 'senha123', 0),
-('Meire Castro', 'meire', 'senha123', 0)
+('Maria Silva', 'Maria', 'senha123', 1),
+('Roseane Vieira', 'Roseane', 'senha123', 0),
+('Aline Resende', 'Aline', 'senha123', 0),
+('Meire Castro', 'Meire', 'senha123', 0)
 ''')
 
 conn.commit()

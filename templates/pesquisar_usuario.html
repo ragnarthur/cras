@@ -49,6 +49,9 @@
                         {% endfor %}
                     </p>
                     {% endif %}
+
+                    <!-- Botão para editar o usuário -->
+                    <a href="{{ url_for('editar_usuario', nome_usuario=usuario['nome']) }}" class="btn btn-primary">Editar</a>
                 </div>
             </div>
         </div>

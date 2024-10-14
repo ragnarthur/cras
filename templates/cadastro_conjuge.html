@@ -1,5 +1,4 @@
-﻿<!-- templates/cadastro_conjuge.html -->
-{% extends "base.html" %}
+﻿{% extends "base.html" %}
 
 {% block title %}Cadastro de Cônjuge - CRAS App{% endblock %}
 
@@ -7,14 +6,42 @@
 <div class="container mt-5">
     <h2 class="text-center mb-4">Cadastro de Cônjuge</h2>
 
-    <form action="{{ url_for('cadastro_conjuge', usuario_id=usuario_id) }}" method="POST" class="needs-validation" novalidate>
+    <form action="{{ url_for('cadastro_conjuge', usuario_id=usuario_id) }}" method="POST" class="needs-validation form-uppercase" novalidate>
         <div class="mb-4">
             <label for="nome_conjuge" class="form-label">Nome do Cônjuge:</label>
             <input type="text" class="form-control form-control-lg" id="nome_conjuge" name="nome_conjuge" required>
             <div class="invalid-feedback">Por favor, insira o nome do cônjuge.</div>
         </div>
 
+        <div class="mb-4">
+            <label for="data_nascimento_conjuge" class="form-label">Data de Nascimento do Cônjuge:</label>
+            <input type="date" class="form-control" id="data_nascimento_conjuge" name="data_nascimento_conjuge" required>
+            <div class="invalid-feedback">Por favor, insira a data de nascimento do cônjuge.</div>
+        </div>
+
+        <!-- Campo para idade do cônjuge, preenchido automaticamente -->
+        <div class="mb-4">
+            <label for="idade_conjuge" class="form-label">Idade do Cônjuge:</label>
+            <input type="number" class="form-control" id="idade_conjuge" name="idade_conjuge" readonly>
+        </div>
+
         <button type="submit" class="btn btn-primary btn-lg w-100">Cadastrar Cônjuge</button>
     </form>
 </div>
+
+<!-- Script para calcular a idade automaticamente -->
+<script>
+    document.getElementById('data_nascimento_conjuge').addEventListener('input', function () {
+        const dataNascimento = new Date(this.value);
+        const hoje = new Date();
+        let idade = hoje.getFullYear() - dataNascimento.getFullYear();
+        const mes = hoje.getMonth() - dataNascimento.getMonth();
+
+        if (mes < 0 || (mes === 0 && hoje.getDate() < dataNascimento.getDate())) {
+            idade--;
+        }
+
+        document.getElementById('idade_conjuge').value = idade >= 0 ? idade : '';
+    });
+</script>
 {% endblock %}
