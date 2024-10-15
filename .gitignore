@@ -27,3 +27,5 @@ tmp/
 # Arquivos de IDE
 .vscode/
 .idea/
+
+database.db

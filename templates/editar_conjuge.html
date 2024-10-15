@@ -1,0 +1,25 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Editar Cônjuge - CRAS App{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Editar Cônjuge</h2>
+
+    <form action="{{ url_for('editar_conjuge', usuario_id=conjuge['usuario_id']) }}" method="POST" class="needs-validation" novalidate>
+        <div class="mb-4">
+            <label for="nome_conjuge" class="form-label">Nome do Cônjuge:</label>
+            <input type="text" class="form-control form-control-lg" id="nome_conjuge" name="nome_conjuge" value="{{ conjuge['nome'] }}" required style="text-transform: uppercase;">
+            <div class="invalid-feedback">Por favor, insira o nome.</div>
+        </div>
+
+        <div class="mb-4">
+            <label for="data_nascimento_conjuge" class="form-label">Data de Nascimento:</label>
+            <input type="date" class="form-control" id="data_nascimento_conjuge" name="data_nascimento_conjuge" value="{{ conjuge['data_nascimento'] }}" required>
+            <div class="invalid-feedback">Por favor, insira a data de nascimento.</div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg w-100">SALVAR ALTERAÇÕES</button>
+    </form>
+</div>
+{% endblock %}

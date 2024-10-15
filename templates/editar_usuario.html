@@ -10,7 +10,7 @@
         <!-- Nome -->
         <div class="mb-4">
             <label for="nome" class="form-label">Nome:</label>
-            <input type="text" class="form-control form-control-lg" id="nome" name="nome" value="{{ usuario['nome'] }}" required>
+            <input type="text" class="form-control form-control-lg" id="nome" name="nome" value="{{ usuario['nome'] }}" required style="text-transform: uppercase;">
             <div class="invalid-feedback">Por favor, insira o nome.</div>
         </div>
 
@@ -27,19 +27,19 @@
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label for="rua" class="form-label">Rua:</label>
-                    <input type="text" class="form-control form-control-lg" id="rua" name="rua" value="{{ usuario['endereco'].split(', ')[0] }}" required>
+                    <input type="text" class="form-control form-control-lg" id="rua" name="rua" value="{{ usuario['endereco'].split(', ')[0] }}" required style="text-transform: uppercase;">
                 </div>
                 <div class="col-md-3 mb-3">
                     <label for="numero" class="form-label">Número:</label>
-                    <input type="text" class="form-control form-control-lg" id="numero" name="numero" value="{{ usuario['endereco'].split(', ')[1] }}" required>
+                    <input type="text" class="form-control form-control-lg" id="numero" name="numero" value="{{ usuario['endereco'].split(', ')[1] }}" required style="text-transform: uppercase;">
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="bairro" class="form-label">Bairro:</label>
-                    <input type="text" class="form-control form-control-lg" id="bairro" name="bairro" value="{{ usuario['endereco'].split(', ')[2] }}" required>
+                    <input type="text" class="form-control form-control-lg" id="bairro" name="bairro" value="{{ usuario['endereco'].split(', ')[2] }}" required style="text-transform: uppercase;">
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="cidade" class="form-label">Cidade:</label>
-                    <input type="text" class="form-control form-control-lg" id="cidade" name="cidade" value="{{ usuario['endereco'].split(', ')[3] }}" required>
+                    <input type="text" class="form-control form-control-lg" id="cidade" name="cidade" value="{{ usuario['endereco'].split(', ')[3] }}" required style="text-transform: uppercase;">
                 </div>
             </div>
         </div>
@@ -73,9 +73,8 @@
         <!-- Campo para observações -->
         <div class="mb-4">
             <label for="observacoes" class="form-label">Observações:</label>
-            <textarea class="form-control form-control-lg" id="observacoes" name="observacoes">{{ usuario['observacoes'] }}</textarea>
+            <textarea class="form-control form-control-lg" id="observacoes" name="observacoes" style="text-transform: uppercase;">{{ usuario['observacoes'] or '' }}</textarea>
         </div>
-
 
         <!-- Exibição da próxima data de retirada -->
         {% if data_proxima_retirada %}
@@ -84,7 +83,30 @@
         </div>
         {% endif %}
 
-        <button type="submit" class="btn btn-primary btn-lg w-100">Salvar Alterações</button>
+        <button type="submit" class="btn btn-primary btn-lg w-100 mb-4">SALVAR ALTERAÇÕES</button>
     </form>
+
+    <!-- Botões para editar filhos e cônjuge, se houver -->
+    {% if filhos %}
+    <div class="mb-3">
+        <h4>EDITAR FILHOS</h4>
+        <ul>
+            {% for filho in filhos %}
+            <li>
+                <strong>{{ filho['nome'] }}</strong> - {{ filho['idade'] }} ANOS
+            </li>
+            <a href="{{ url_for('editar_filho', filho_id=filho['id']) }}" class="btn btn-outline-primary mt-2">EDITAR FILHO</a>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    {% if conjuge %}
+    <div class="mb-3">
+        <h4>EDITAR CÔNJUGE</h4>
+        <p><strong>{{ conjuge['nome'] }}</strong> - {{ conjuge['data_nascimento'] }}</p>
+        <a href="{{ url_for('editar_conjuge', usuario_id=usuario['id']) }}" class="btn btn-outline-primary">EDITAR CÔNJUGE</a>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

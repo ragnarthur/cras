@@ -1,0 +1,31 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Editar Filho - CRAS App{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Editar Filho</h2>
+
+    <form action="{{ url_for('editar_filho', filho_id=filho['id']) }}" method="POST" class="needs-validation" novalidate>
+        <div class="mb-4">
+            <label for="nome_filho" class="form-label">Nome do Filho:</label>
+            <input type="text" class="form-control form-control-lg" id="nome_filho" name="nome_filho" value="{{ filho['nome'] }}" required style="text-transform: uppercase;">
+            <div class="invalid-feedback">Por favor, insira o nome.</div>
+        </div>
+
+        <div class="mb-4">
+            <label for="data_nascimento_filho" class="form-label">Data de Nascimento:</label>
+            <input type="date" class="form-control" id="data_nascimento_filho" name="data_nascimento_filho" value="{{ filho['data_nascimento'] }}" required>
+            <div class="invalid-feedback">Por favor, insira a data de nascimento.</div>
+        </div>
+
+        <div class="mb-4">
+            <label for="idade_filho" class="form-label">Idade:</label>
+            <input type="number" class="form-control" id="idade_filho" name="idade_filho" value="{{ filho['idade'] }}" required>
+            <div class="invalid-feedback">Por favor, insira a idade.</div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg w-100">SALVAR ALTERAÇÕES</button>
+    </form>
+</div>
+{% endblock %}
