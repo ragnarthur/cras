@@ -268,34 +268,40 @@ h6 {
 
 /* === Cards para Edição de Filhos e Cônjuge === */
 .card-edit {
-    border-radius: 0.5rem;
+    border-radius: 0.75rem;
     background-color: #f8f9fa;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    padding: 1.5rem;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
     margin-bottom: 2rem;
 }
 
 /* Estilização da lista de filhos */
 .list-group-item {
-    font-size: 1rem;
+    font-size: 1.2rem;
     border: none;
     background-color: transparent;
+    padding-left: 0;
+    padding-right: 0;
+    display: block; /* Força os elementos a serem exibidos em blocos, um abaixo do outro */
 }
 
 /* Título da seção de edição de filhos/cônjuge */
 .card-title-edit {
-    font-size: 1.4rem;
+    font-size: 1.5rem;
     font-weight: 600;
+    text-transform: uppercase;
 }
 
 /* Botão de edição para filhos/cônjuge */
 .btn-edit {
-    font-size: 0.9rem;
-    padding: 0.5rem 1rem;
-    border-radius: 0.25rem;
+    font-size: 1rem;
+    padding: 0.5rem 1rem; /* Tamanho ajustado para botões */
+    border-radius: 0.5rem;
     background-color: #0d6efd;
     color: white;
     text-transform: uppercase;
+    transition: background-color 0.3s ease;
+    margin-top: 0.5rem; /* Adiciona um pequeno espaçamento acima do botão */
 }
 
 .btn-edit:hover {
@@ -311,7 +317,7 @@ h6 {
     margin-bottom: 1rem !important;
 }
 
-/* === Estilo para inputs da página de edição === */
+/* Estilo para inputs da página de edição */
 .input-group-lg {
     font-size: 1.125rem;
     padding: 1rem;
@@ -321,12 +327,22 @@ h6 {
 textarea {
     text-transform: uppercase;
     font-size: 1.1rem;
+    padding: 0.75rem;
 }
+
 /* Melhorar o espaçamento e a estilização dos botões */
 .btn-outline-primary {
     text-transform: uppercase;
     font-weight: bold;
     margin-top: 1rem;
+    padding: 0.75rem 1.25rem;
+    border-radius: 0.5rem;
+    transition: background-color 0.3s ease;
+}
+
+.btn-outline-primary:hover {
+    background-color: #0a58ca;
+    color: #fff;
 }
 
 /* Espaçamento para os botões de edição */
@@ -337,11 +353,13 @@ textarea {
 /* Garantir que os nomes dos filhos e cônjuges estejam em maiúsculas */
 ul li, p {
     text-transform: uppercase;
+    font-weight: bold;
 }
 
 /* Estilo consistente para os títulos das seções de edição */
 h4 {
-    font-size: 1.4rem;
+    font-size: 1.5rem;
     font-weight: bold;
     text-transform: uppercase;
+    margin-bottom: 1.5rem;
 }

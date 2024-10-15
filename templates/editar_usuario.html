@@ -86,27 +86,34 @@
         <button type="submit" class="btn btn-primary btn-lg w-100 mb-4">SALVAR ALTERAÇÕES</button>
     </form>
 
-    <!-- Botões para editar filhos e cônjuge, se houver -->
+    <!-- Box unificado para edição de filhos e cônjuge -->
+    <div class="card card-edit">
+        <h4 class="card-title-edit">Editar Informações Familiares</h4>
+
+    <!-- Filhos -->
     {% if filhos %}
     <div class="mb-3">
-        <h4>EDITAR FILHOS</h4>
-        <ul>
+        <h5 class="card-title-edit">Filhos</h5>
+        <ul class="list-group">
             {% for filho in filhos %}
-            <li>
-                <strong>{{ filho['nome'] }}</strong> - {{ filho['idade'] }} ANOS
+            <li class="list-group-item">
+                <span><strong>{{ filho['nome'] }}</strong> - {{ filho['idade'] }} ANOS</span>
+                <br> <!-- Adiciona uma quebra de linha para garantir que o botão fique abaixo -->
+                <a href="{{ url_for('editar_filho', filho_id=filho['id']) }}" class="btn btn-edit mt-2">EDITAR FILHO</a>
             </li>
-            <a href="{{ url_for('editar_filho', filho_id=filho['id']) }}" class="btn btn-outline-primary mt-2">EDITAR FILHO</a>
             {% endfor %}
         </ul>
     </div>
     {% endif %}
 
+    <!-- Cônjuge -->
     {% if conjuge %}
     <div class="mb-3">
-        <h4>EDITAR CÔNJUGE</h4>
+        <h5 class="card-title-edit">Cônjuge</h5>
         <p><strong>{{ conjuge['nome'] }}</strong> - {{ conjuge['data_nascimento'] }}</p>
-        <a href="{{ url_for('editar_conjuge', usuario_id=usuario['id']) }}" class="btn btn-outline-primary">EDITAR CÔNJUGE</a>
+        <a href="{{ url_for('editar_conjuge', usuario_id=usuario['id']) }}" class="btn btn-edit">EDITAR CÔNJUGE</a>
     </div>
     {% endif %}
 </div>
+
 {% endblock %}
