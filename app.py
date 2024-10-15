@@ -16,20 +16,27 @@ def connect_db():
 def before_request():
     g.db = connect_db()
 
-# Função para garantir que a coluna 'observacoes' seja adicionada
-def alterar_tabela():
+# Função para garantir que a tabela 'observacoes' seja criada
+def criar_tabela_observacoes():
     with g.db:
         cursor = g.db.cursor()
-        try:
-            cursor.execute("ALTER TABLE usuarios ADD COLUMN observacoes TEXT")
-            g.db.commit()
-        except sqlite3.OperationalError:
-            pass  # Ignorar se a coluna já existir
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS observacoes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            usuario_id INTEGER,
+            gestante_id INTEGER,
+            data_observacao TEXT,
+            observacao TEXT,
+            FOREIGN KEY(usuario_id) REFERENCES usuarios(id),
+            FOREIGN KEY(gestante_id) REFERENCES gestantes(id)
+        )
+        """)
+        g.db.commit()
 
-# Garantir que a tabela é alterada quando necessário
+# Chamar a função de criação de tabela antes de cada requisição
 @app.before_request
-def check_table():
-    alterar_tabela()
+def check_tables():
+    criar_tabela_observacoes()
 
 # Depois de cada requisição, fechar a conexão com o banco de dados
 @app.teardown_request
@@ -38,6 +45,7 @@ def teardown_request(exception):
     if db is not None:
         db.close()
 
+# Filtros de template
 @app.template_filter('format_telefone')
 def format_telefone(telefone):
     telefone = ''.join([num for num in telefone if num.isdigit()])
@@ -47,7 +55,6 @@ def format_telefone(telefone):
         return f"({telefone[:2]}) {telefone[2:6]}-{telefone[6:]}"
     else:
         return telefone
-    
 
 @app.template_filter('format_data')
 def format_data(data_str):
@@ -84,7 +91,8 @@ def dashboard():
         return redirect(url_for('index'))
     return render_template('dashboard.html', is_admin=session.get('is_admin'))
 
-# Rota para cadastro de usuário
+# Rotas de CRUD de Usuários, Filhos e Cônjuges
+
 @app.route('/cadastro_usuario', methods=['GET', 'POST'])
 def cadastro_usuario():
     if 'username' not in session:
@@ -109,7 +117,7 @@ def cadastro_usuario():
             "INSERT INTO usuarios (nome, data_nascimento, endereco, telefone, filhos, conjuge, bolsa_familia, data_cesta) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
             (nome, data_nascimento, endereco, telefone, filhos, conjuge, bolsa_familia, data_cesta)
         )
-        usuario_id = cursor.lastrowid  # Pegamos o ID do usuário recém-criado
+        usuario_id = cursor.lastrowid
         g.db.commit()
 
         # Redirecionamento condicional
@@ -127,7 +135,6 @@ def cadastro_filho(usuario_id):
     if 'username' not in session:
         return redirect(url_for('index'))
 
-    # Busca o status de "conjuge" do usuário
     cursor = g.db.cursor()
     cursor.execute("SELECT conjuge FROM usuarios WHERE id = ?", (usuario_id,))
     usuario = cursor.fetchone()
@@ -143,13 +150,10 @@ def cadastro_filho(usuario_id):
         g.db.commit()
 
         if cadastrar_outro == 'sim':
-            # Redireciona para o cadastro de outro filho
             return redirect(url_for('cadastro_filho', usuario_id=usuario_id))
         elif usuario['conjuge'] == 'sim':
-            # Se o cônjuge está marcado, redireciona para o cadastro de cônjuge
             return redirect(url_for('cadastro_conjuge', usuario_id=usuario_id))
         else:
-            # Caso contrário, vai para o dashboard
             return redirect(url_for('dashboard'))
 
     return render_template('cadastro_filho.html', usuario_id=usuario_id)
@@ -184,7 +188,13 @@ def editar_usuario(nome_usuario):
     if not usuario:
         return redirect(url_for('pesquisar_usuario'))
 
-    # Atualizar os dados do usuário se o formulário for enviado
+    # Calcular a data da próxima retirada, se houver data da última retirada
+    if usuario['data_cesta']:
+        ultima_data = datetime.strptime(usuario['data_cesta'], '%Y-%m-%d')
+        data_proxima_retirada = ultima_data + timedelta(days=90)
+    else:
+        data_proxima_retirada = None
+
     if request.method == 'POST':
         nome = request.form['nome']
         data_nascimento = request.form['data_nascimento']
@@ -195,39 +205,42 @@ def editar_usuario(nome_usuario):
         telefone = request.form['telefone']
         bolsa_familia = request.form['bolsa_familia']
         data_cesta = request.form['data_cesta']
-        observacoes = request.form['observacoes']
 
-        # Calcular a próxima data de retirada (3 meses após a data_cesta)
-        if data_cesta:
-            data_proxima_retirada = datetime.strptime(data_cesta, '%Y-%m-%d') + timedelta(days=90)
-        else:
-            data_proxima_retirada = None
-
+        nova_observacao = request.form.get('nova_observacao')
+        if nova_observacao:
+            cursor.execute("""
+                INSERT INTO observacoes (usuario_id, observacao, data_observacao) 
+                VALUES (?, ?, ?)
+            """, (usuario['id'], nova_observacao, datetime.now().strftime('%Y-%m-%d')))
+        
         cursor.execute("""
             UPDATE usuarios SET nome = ?, data_nascimento = ?, endereco = ?, telefone = ?, 
-            bolsa_familia = ?, data_cesta = ?, observacoes = ? WHERE nome = ?
+            bolsa_familia = ?, data_cesta = ? WHERE nome = ?
         """, (
             nome, data_nascimento, f"{rua}, {numero}, {bairro}, {cidade}", telefone,
-            bolsa_familia, data_cesta, observacoes, nome_usuario
+            bolsa_familia, data_cesta, nome_usuario
         ))
         g.db.commit()
         return redirect(url_for('pesquisar_usuario'))
 
-    # Buscar os filhos e cônjuge do usuário para exibição na página de edição
     cursor.execute("SELECT * FROM filhos WHERE usuario_id = ?", (usuario['id'],))
     filhos = cursor.fetchall()
 
     cursor.execute("SELECT * FROM conjuge WHERE usuario_id = ?", (usuario['id'],))
     conjuge = cursor.fetchone()
 
-    # Calcular a próxima data de retirada para exibir na ficha
-    if usuario['data_cesta']:
-        data_proxima_retirada = datetime.strptime(usuario['data_cesta'], '%Y-%m-%d') + timedelta(days=90)
-    else:
-        data_proxima_retirada = None
+    cursor.execute("SELECT observacao, data_observacao FROM observacoes WHERE usuario_id = ?", (usuario['id'],))
+    observacoes = cursor.fetchall()
 
-    return render_template('editar_usuario.html', usuario=usuario, filhos=filhos, conjuge=conjuge, data_proxima_retirada=data_proxima_retirada)
+    observacoes_corrigidas = []
+    for observacao in observacoes:
+        observacao_dict = dict(observacao)
+        observacao_dict['data_observacao'] = datetime.strptime(observacao_dict['data_observacao'], '%Y-%m-%d')
+        observacoes_corrigidas.append(observacao_dict)
 
+    # Passar data_proxima_retirada para o template
+    return render_template('editar_usuario.html', usuario=usuario, filhos=filhos, conjuge=conjuge, 
+                           observacoes=observacoes_corrigidas, data_proxima_retirada=data_proxima_retirada)
 
 @app.route('/editar_filho/<int:filho_id>', methods=['GET', 'POST'])
 def editar_filho(filho_id):
@@ -248,11 +261,11 @@ def editar_filho(filho_id):
         """, (nome_filho, idade_filho, data_nascimento_filho, filho_id))
         g.db.commit()
 
-        # Aqui, usamos o usuario_id ao invés de nome_usuario para redirecionar de volta ao editar_usuario
-        return redirect(url_for('editar_usuario', nome_usuario=filho['usuario_id']))
+        cursor.execute("SELECT nome FROM usuarios WHERE id = ?", (filho['usuario_id'],))
+        usuario = cursor.fetchone()
+        return redirect(url_for('editar_usuario', nome_usuario=usuario['nome']))
 
     return render_template('editar_filho.html', filho=filho)
-
 
 @app.route('/editar_conjuge/<int:usuario_id>', methods=['GET', 'POST'])
 def editar_conjuge(usuario_id):
@@ -272,10 +285,13 @@ def editar_conjuge(usuario_id):
         """, (nome_conjuge, data_nascimento_conjuge, usuario_id))
         g.db.commit()
 
-        # Redirecionando de volta para a edição do usuário usando usuario_id
-        return redirect(url_for('editar_usuario', nome_usuario=usuario_id))
+        cursor.execute("SELECT nome FROM usuarios WHERE id = ?", (usuario_id,))
+        usuario = cursor.fetchone()
+        return redirect(url_for('editar_usuario', nome_usuario=usuario['nome']))
 
     return render_template('editar_conjuge.html', conjuge=conjuge)
+
+# Rotas de CRUD de Gestantes
 
 @app.route('/cadastro_gestante', methods=['GET', 'POST'])
 def cadastro_gestante():
@@ -302,10 +318,9 @@ def cadastro_gestante():
             INSERT INTO gestantes (nome, data_nascimento, endereco, telefone, data_parto, bolsa_familia, data_cesta) 
             VALUES (?, ?, ?, ?, ?, ?, ?)
         """, (nome, data_nascimento, endereco, telefone, data_parto, bolsa_familia, data_cesta))
-        gestante_id = cursor.lastrowid  # Pegamos o ID da gestante recém-criada
+        gestante_id = cursor.lastrowid
         g.db.commit()
 
-        # Redirecionar condicionalmente para o cadastro de filho ou cônjuge
         if possui_filhos == 'sim':
             return redirect(url_for('cadastro_filho', usuario_id=gestante_id))
         elif possui_conjuge == 'sim':
@@ -315,8 +330,59 @@ def cadastro_gestante():
 
     return render_template('cadastro_gestante.html')
 
+@app.route('/editar_gestante/<int:gestante_id>', methods=['GET', 'POST'])
+def editar_gestante(gestante_id):
+    if 'username' not in session:
+        return redirect(url_for('index'))
 
-# Rota para pesquisar usuários
+    cursor = g.db.cursor()
+    cursor.execute("SELECT * FROM gestantes WHERE id = ?", (gestante_id,))
+    gestante = cursor.fetchone()
+
+    # Calcular a data da próxima retirada, se houver data da última retirada
+    if gestante['data_cesta']:
+        ultima_data = datetime.strptime(gestante['data_cesta'], '%Y-%m-%d')
+        data_proxima_retirada = ultima_data + timedelta(days=90)
+    else:
+        data_proxima_retirada = None
+
+    if request.method == 'POST':
+        nome = request.form['nome']
+        data_nascimento = request.form['data_nascimento']
+        endereco = request.form['endereco']
+        telefone = request.form['telefone']
+        data_parto = request.form['data_parto']
+        bolsa_familia = request.form['bolsa_familia']
+        data_cesta = request.form['data_cesta']
+
+        nova_observacao = request.form.get('nova_observacao')
+        if nova_observacao:
+            cursor.execute("""
+                INSERT INTO observacoes (gestante_id, observacao, data_observacao) 
+                VALUES (?, ?, ?)
+            """, (gestante['id'], nova_observacao, datetime.now().strftime('%Y-%m-%d')))
+
+        cursor.execute("""
+            UPDATE gestantes SET nome = ?, data_nascimento = ?, endereco = ?, telefone = ?, 
+            data_parto = ?, bolsa_familia = ?, data_cesta = ? WHERE id = ?
+        """, (nome, data_nascimento, endereco, telefone, data_parto, bolsa_familia, data_cesta, gestante_id))
+        g.db.commit()
+
+        return redirect(url_for('pesquisar_gestantes'))
+
+    cursor.execute("SELECT observacao, data_observacao FROM observacoes WHERE gestante_id = ?", (gestante['id'],))
+    observacoes = cursor.fetchall()
+
+    observacoes_corrigidas = []
+    for observacao in observacoes:
+        observacao_dict = dict(observacao)
+        observacao_dict['data_observacao'] = datetime.strptime(observacao_dict['data_observacao'], '%Y-%m-%d')
+        observacoes_corrigidas.append(observacao_dict)
+
+    return render_template('editar_gestante.html', gestante=gestante, 
+                           observacoes=observacoes_corrigidas, data_proxima_retirada=data_proxima_retirada)
+
+# Rotas de Pesquisa de Usuários e Gestantes
 @app.route('/pesquisar_usuario', methods=['GET', 'POST'])
 def pesquisar_usuario():
     if 'username' not in session:
@@ -334,7 +400,6 @@ def pesquisar_usuario():
             usuario = dict(usuario_row)
             usuario_id = usuario['id']
 
-            # Calcula a próxima retirada da cesta básica (90 dias após a última)
             if usuario['data_cesta']:
                 ultima_data = datetime.strptime(usuario['data_cesta'], '%Y-%m-%d')
                 proxima_data = ultima_data + timedelta(days=90)
@@ -342,7 +407,6 @@ def pesquisar_usuario():
             else:
                 usuario['data_proxima_retirada'] = None
 
-            # Buscar filhos e cônjuge
             cursor.execute("SELECT nome, idade, data_nascimento FROM filhos WHERE usuario_id = ?", (usuario_id,))
             filhos = cursor.fetchall()
             usuario['filhos'] = [{"nome": filho['nome'].upper(), "idade": filho['idade'], "data_nascimento": filho['data_nascimento']} for filho in filhos]
@@ -375,46 +439,13 @@ def pesquisar_gestantes():
 
     return render_template('pesquisar_gestantes.html', gestantes=gestantes, datetime=datetime, timedelta=timedelta)
 
-@app.route('/editar_gestante/<int:gestante_id>', methods=['GET', 'POST'])
-def editar_gestante(gestante_id):
-    # Verifique se o usuário está autenticado
-    if 'username' not in session:
-        return redirect(url_for('index'))
-
-    # Buscando os dados da gestante no banco
-    cursor = g.db.cursor()
-    cursor.execute("SELECT * FROM gestantes WHERE id = ?", (gestante_id,))
-    gestante = cursor.fetchone()
-
-    if request.method == 'POST':
-        nome = request.form['nome']
-        data_nascimento = request.form['data_nascimento']
-        endereco = request.form['endereco']
-        telefone = request.form['telefone']
-        data_parto = request.form['data_parto']
-        bolsa_familia = request.form['bolsa_familia']
-        data_cesta = request.form['data_cesta']
-
-        # Atualizar os dados da gestante no banco
-        cursor.execute("""
-            UPDATE gestantes SET nome = ?, data_nascimento = ?, endereco = ?, telefone = ?, 
-            data_parto = ?, bolsa_familia = ?, data_cesta = ? WHERE id = ?
-        """, (nome, data_nascimento, endereco, telefone, data_parto, bolsa_familia, data_cesta, gestante_id))
-        g.db.commit()
-
-        return redirect(url_for('pesquisar_gestantes'))
-
-    # Renderiza o template de edição com os dados da gestante
-    return render_template('editar_gestante.html', gestante=gestante)
-
-
-# Rota para logout
+# Rota de Logout
 @app.route('/logout')
 def logout():
     session.clear()
     return redirect(url_for('index'))
 
-# Rota para adicionar novas secretárias (apenas administradores)
+# Rota de Adicionar Secretárias (apenas para administradores)
 @app.route('/admin/add_secretaria', methods=['GET', 'POST'])
 def add_secretaria():
     if 'username' not in session or not session.get('is_admin'):
@@ -437,7 +468,6 @@ def add_secretaria():
         return redirect(url_for('dashboard'))
 
     return render_template('add_secretaria.html')
-
 
 if __name__ == '__main__':
     app.run(debug=True)

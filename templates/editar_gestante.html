@@ -34,19 +34,19 @@
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label for="rua" class="form-label">Rua:</label>
-                    <input type="text" class="form-control form-control-lg" id="rua" name="rua" value="{{ gestante['endereco'].split(', ')[0] }}" required style="text-transform: uppercase;">
+                    <input type="text" class="form-control form-control-lg" id="rua" name="rua" value="{{ gestante['endereco'].split(', ')[0] if gestante['endereco'] else '' }}" required style="text-transform: uppercase;">
                 </div>
                 <div class="col-md-3 mb-3">
                     <label for="numero" class="form-label">Número:</label>
-                    <input type="text" class="form-control form-control-lg" id="numero" name="numero" value="{{ gestante['endereco'].split(', ')[1] }}" required style="text-transform: uppercase;">
+                    <input type="text" class="form-control form-control-lg" id="numero" name="numero" value="{{ gestante['endereco'].split(', ')[1] if gestante['endereco'] else '' }}" required style="text-transform: uppercase;">
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="bairro" class="form-label">Bairro:</label>
-                    <input type="text" class="form-control form-control-lg" id="bairro" name="bairro" value="{{ gestante['endereco'].split(', ')[2] }}" required style="text-transform: uppercase;">
+                    <input type="text" class="form-control form-control-lg" id="bairro" name="bairro" value="{{ gestante['endereco'].split(', ')[2] if gestante['endereco'] else '' }}" required style="text-transform: uppercase;">
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="cidade" class="form-label">Cidade:</label>
-                    <input type="text" class="form-control form-control-lg" id="cidade" name="cidade" value="{{ gestante['endereco'].split(', ')[3] }}" required style="text-transform: uppercase;">
+                    <input type="text" class="form-control form-control-lg" id="cidade" name="cidade" value="{{ gestante['endereco'].split(', ')[3] if gestante['endereco'] else '' }}" required style="text-transform: uppercase;">
                 </div>
             </div>
         </div>
@@ -80,14 +80,30 @@
             <div class="invalid-feedback">Por favor, insira a data de retirada da cesta básica.</div>
         </div>
 
-        <!-- Observações -->
+        <!-- Observações anteriores -->
         <div class="mb-4">
-            <label for="observacoes" class="form-label">Observações:</label>
-            <textarea class="form-control form-control-lg" id="observacoes" name="observacoes" style="text-transform: uppercase;">{{ gestante['observacoes'] or '' }}</textarea>
+            <label class="form-label">Observações Anteriores:</label>
+            {% if observacoes %}
+            <ul class="list-group">
+                {% for obs in observacoes %}
+                <li class="list-group-item">
+                    <strong>{{ obs.data_observacao.strftime('%d/%m/%Y') }}:</strong> {{ obs.observacao }}
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p>Sem observações anteriores.</p>
+            {% endif %}
+        </div>
+
+        <!-- Campo para adicionar nova observação -->
+        <div class="mb-4">
+            <label for="nova_observacao" class="form-label">Adicionar Nova Observação:</label>
+            <textarea class="form-control form-control-lg" id="nova_observacao" name="nova_observacao" placeholder="Insira uma nova observação" style="text-transform: uppercase;"></textarea>
         </div>
 
         <!-- Exibição da próxima data de retirada -->
-        {% if data_proxima_retirada %}
+        {% if data_proxima_retirada is not none %}
         <div class="alert alert-info">
             <strong>Próxima retirada da cesta básica:</strong> {{ data_proxima_retirada.strftime('%d/%m/%Y') }}
         </div>
