@@ -1,24 +1,36 @@
 ﻿/* === Navbar === */
-/* Ajuste do tamanho da fonte para os textos do navbar */
+/* Ajuste do tamanho da fonte para os textos do navbar, deixando mais leve e suave */
 .navbar-nav .nav-link, .navbar-brand, .navbar-text {
-    font-size: 1.4rem; /* Aumenta um pouco o tamanho da fonte */
+    font-size: 1.2rem; /* Tamanho ideal para o navbar */
+    font-weight: 500;
+    letter-spacing: 0.05rem; /* Adiciona espaçamento entre letras para suavidade */
 }
 
-/* Campos de entrada com letras maiúsculas (usado nas rotas de cadastro) */
-.form-uppercase input[type="text"], 
-.form-uppercase input[type="tel"], 
-.form-uppercase input[type="email"] {
-    text-transform: uppercase;
+.navbar {
+    background-color: #0d6efd; /* Cor primária padrão */
 }
 
-/* Campos de entrada do login sem letras maiúsculas */
-input[type="text"], input[type="password"] {
-    text-transform: none;
+.navbar-brand {
+    font-size: 1.5rem; /* Destaque para o nome da aplicação */
+    font-weight: bold;
+}
+
+.nav-link {
+    color: #f8f9fa; /* Cor clara para contraste com o fundo */
+}
+
+.nav-link:hover {
+    color: #fff; /* Realce no hover */
+    text-shadow: 0px 0px 5px rgba(255, 255, 255, 0.5);
+}
+
+.navbar-toggler {
+    border: none; /* Remove borda do botão do menu mobile */
 }
 
 /* Estilo personalizado para o botão de 'Sair' na navbar */
 .navbar-nav .nav-link.btn {
-    font-size: 0.875rem;
+    font-size: 1rem;
     padding: 0.25rem 0.75rem;
     border-radius: 0.25rem;
     line-height: 1.5;
@@ -246,7 +258,6 @@ h6 {
 .list-group {
     margin-top: 1rem;
 }
-
 
 /* === Resultados da Pesquisa === */
 /* Garantir que o texto dos resultados seja exibido em negrito e letras maiúsculas */
