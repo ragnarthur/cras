@@ -1,0 +1,73 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Pesquisar Gestantes - CRAS App{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Pesquisar Gestantes</h2>
+
+    <!-- Formulário de pesquisa -->
+    <form action="{{ url_for('pesquisar_gestantes') }}" method="POST" class="needs-validation" novalidate>
+        <div class="input-group mb-3">
+            <input type="text" class="form-control" id="pesquisa" name="pesquisa" placeholder="Digite o nome ou telefone" required>
+            <button type="submit" class="btn btn-primary">Pesquisar</button>
+            <div class="invalid-feedback">Por favor, insira um termo de pesquisa.</div>
+        </div>
+    </form>
+
+    <!-- Resultados da pesquisa -->
+    {% if gestantes %}
+    <h3 class="mt-5 text-center">Resultados da Pesquisa</h3>
+    <div class="row justify-content-center">
+        {% for gestante in gestantes %}
+        <div class="col-md-6">
+            <div class="card mb-4 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title text-uppercase">
+                        <i class="bi bi-person-fill"></i> <strong>{{ gestante['nome'] }}</strong>
+                    </h5>
+                    <p class="card-text text-uppercase">
+                        <i class="bi bi-telephone-fill"></i> <strong>TELEFONE:</strong> {{ gestante['telefone'] }}<br>
+                        <i class="bi bi-house-door-fill"></i> <strong>ENDEREÇO:</strong> {{ gestante['endereco'] }}<br>
+                        <i class="bi bi-calendar-fill"></i> <strong>DATA PREVISTA PARA PARTO:</strong> {{ datetime.strptime(gestante['data_parto'], '%Y-%m-%d').strftime('%d/%m/%Y') }}<br>
+                        <i class="bi bi-wallet-fill"></i> <strong>BOLSA FAMÍLIA:</strong> {{ 'sim' if gestante['bolsa_familia'] == 'sim' else 'não' }}<br>
+                        <i class="bi bi-calendar-fill"></i> <strong>ÚLTIMA RETIRADA DA CESTA BÁSICA:</strong> {{ gestante['data_cesta'] | format_data }}<br>
+                        <div class="data-cesta-info">
+                            <i class="bi bi-calendar-fill"></i> <strong>PRÓXIMA RETIRADA DA CESTA BÁSICA:</strong>
+                            {% if gestante['data_cesta'] %}
+                                {{ (datetime.strptime(gestante['data_cesta'], '%Y-%m-%d') + timedelta(days=30)).strftime('%d/%m/%Y') }}
+                            {% endif %}
+                        </div>
+                    </p>
+
+                    <!-- Botões para editar dados da gestante -->
+                    <a href="{{ url_for('editar_gestante', gestante_id=gestante['id']) }}" class="btn btn-primary">Editar Gestante</a>
+
+                    <!-- Exibir cônjuge e botão de edição se houver -->
+                    {% if gestante['conjuge_nome'] %}
+                    <p class="card-text text-uppercase mt-3">
+                        <i class="bi bi-heart-fill"></i> <strong>CÔNJUGE:</strong> {{ gestante['conjuge_nome'] }}
+                    </p>
+                    <a href="{{ url_for('editar_conjuge', usuario_id=gestante['id']) }}" class="btn btn-outline-secondary">Editar Cônjuge</a>
+                    {% endif %}
+
+                    <!-- Exibir filhos e botão de edição se houver -->
+                    {% if gestante['filhos'] %}
+                    <p class="card-text text-uppercase mt-3">
+                        <i class="bi bi-people-fill"></i> <strong>FILHOS:</strong> 
+                        {% for filho in gestante['filhos'] %}
+                        {{ filho['nome'] }} - {{ filho['idade'] }} anos{% if not loop.last %}, {% endif %}
+                        <a href="{{ url_for('editar_filho', filho_id=filho['id']) }}" class="btn btn-outline-secondary mt-2">Editar Filho</a>
+                        {% endfor %}
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% elif request.method == 'POST' %}
+    <p class="mt-3 text-center">Nenhuma gestante encontrada.</p>
+    {% endif %}
+</div>
+{% endblock %}

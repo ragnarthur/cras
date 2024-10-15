@@ -25,7 +25,13 @@
                         <a class="nav-link" href="{{ url_for('cadastro_usuario') }}">Cadastrar Usuário</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('cadastro_gestante') }}">Cadastro de Gestante</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('pesquisar_usuario') }}">Pesquisar Usuário</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('pesquisar_gestantes') }}">Pesquisar Gestante</a> <!-- Novo link -->
                     </li>
                     {% if session.get('is_admin') %}
                     <li class="nav-item">
@@ -54,6 +60,7 @@
             </div>
         </div>
     </nav>
+    
 
     <!-- Main Content -->
     <div class="container mt-4">

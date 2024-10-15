@@ -277,6 +277,44 @@ def editar_conjuge(usuario_id):
 
     return render_template('editar_conjuge.html', conjuge=conjuge)
 
+@app.route('/cadastro_gestante', methods=['GET', 'POST'])
+def cadastro_gestante():
+    if 'username' not in session:
+        return redirect(url_for('index'))
+
+    if request.method == 'POST':
+        nome = request.form['nome']
+        data_nascimento = request.form['data_nascimento']
+        rua = request.form['rua']
+        numero = request.form['numero']
+        bairro = request.form['bairro']
+        cidade = request.form['cidade']
+        endereco = f"{rua}, {numero}, {bairro}, {cidade}"
+        telefone = request.form['telefone']
+        data_parto = request.form['data_parto']
+        bolsa_familia = request.form['bolsa_familia']
+        data_cesta = request.form['data_cesta']
+        possui_filhos = request.form.get('filhos', 'não')
+        possui_conjuge = request.form.get('conjuge', 'não')
+
+        cursor = g.db.cursor()
+        cursor.execute("""
+            INSERT INTO gestantes (nome, data_nascimento, endereco, telefone, data_parto, bolsa_familia, data_cesta) 
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, (nome, data_nascimento, endereco, telefone, data_parto, bolsa_familia, data_cesta))
+        gestante_id = cursor.lastrowid  # Pegamos o ID da gestante recém-criada
+        g.db.commit()
+
+        # Redirecionar condicionalmente para o cadastro de filho ou cônjuge
+        if possui_filhos == 'sim':
+            return redirect(url_for('cadastro_filho', usuario_id=gestante_id))
+        elif possui_conjuge == 'sim':
+            return redirect(url_for('cadastro_conjuge', usuario_id=gestante_id))
+        else:
+            return redirect(url_for('dashboard'))
+
+    return render_template('cadastro_gestante.html')
+
 
 # Rota para pesquisar usuários
 @app.route('/pesquisar_usuario', methods=['GET', 'POST'])
@@ -296,6 +334,15 @@ def pesquisar_usuario():
             usuario = dict(usuario_row)
             usuario_id = usuario['id']
 
+            # Calcula a próxima retirada da cesta básica (90 dias após a última)
+            if usuario['data_cesta']:
+                ultima_data = datetime.strptime(usuario['data_cesta'], '%Y-%m-%d')
+                proxima_data = ultima_data + timedelta(days=90)
+                usuario['data_proxima_retirada'] = proxima_data.strftime('%Y-%m-%d')
+            else:
+                usuario['data_proxima_retirada'] = None
+
+            # Buscar filhos e cônjuge
             cursor.execute("SELECT nome, idade, data_nascimento FROM filhos WHERE usuario_id = ?", (usuario_id,))
             filhos = cursor.fetchall()
             usuario['filhos'] = [{"nome": filho['nome'].upper(), "idade": filho['idade'], "data_nascimento": filho['data_nascimento']} for filho in filhos]
@@ -308,6 +355,58 @@ def pesquisar_usuario():
             usuarios.append(usuario)
 
     return render_template('pesquisar_usuario.html', usuarios=usuarios)
+
+@app.route('/pesquisar_gestantes', methods=['GET', 'POST'])
+def pesquisar_gestantes():
+    if 'username' not in session:
+        return redirect(url_for('index'))
+
+    gestantes = []
+    if request.method == 'POST':
+        pesquisa = request.form['pesquisa']
+        cursor = g.db.cursor()
+        cursor.execute("SELECT * FROM gestantes WHERE nome LIKE ? OR telefone LIKE ?", 
+                       ('%' + pesquisa + '%', '%' + pesquisa + '%'))
+        gestantes_rows = cursor.fetchall()
+
+        for gestante_row in gestantes_rows:
+            gestante = dict(gestante_row)
+            gestantes.append(gestante)
+
+    return render_template('pesquisar_gestantes.html', gestantes=gestantes, datetime=datetime, timedelta=timedelta)
+
+@app.route('/editar_gestante/<int:gestante_id>', methods=['GET', 'POST'])
+def editar_gestante(gestante_id):
+    # Verifique se o usuário está autenticado
+    if 'username' not in session:
+        return redirect(url_for('index'))
+
+    # Buscando os dados da gestante no banco
+    cursor = g.db.cursor()
+    cursor.execute("SELECT * FROM gestantes WHERE id = ?", (gestante_id,))
+    gestante = cursor.fetchone()
+
+    if request.method == 'POST':
+        nome = request.form['nome']
+        data_nascimento = request.form['data_nascimento']
+        endereco = request.form['endereco']
+        telefone = request.form['telefone']
+        data_parto = request.form['data_parto']
+        bolsa_familia = request.form['bolsa_familia']
+        data_cesta = request.form['data_cesta']
+
+        # Atualizar os dados da gestante no banco
+        cursor.execute("""
+            UPDATE gestantes SET nome = ?, data_nascimento = ?, endereco = ?, telefone = ?, 
+            data_parto = ?, bolsa_familia = ?, data_cesta = ? WHERE id = ?
+        """, (nome, data_nascimento, endereco, telefone, data_parto, bolsa_familia, data_cesta, gestante_id))
+        g.db.commit()
+
+        return redirect(url_for('pesquisar_gestantes'))
+
+    # Renderiza o template de edição com os dados da gestante
+    return render_template('editar_gestante.html', gestante=gestante)
+
 
 # Rota para logout
 @app.route('/logout')

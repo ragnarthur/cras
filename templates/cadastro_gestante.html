@@ -1,0 +1,105 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Cadastro de Gestante - CRAS App{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Cadastro de Gestante</h2>
+
+    <form action="{{ url_for('cadastro_gestante') }}" method="POST" class="needs-validation form-uppercase" novalidate>
+        <!-- Nome -->
+        <div class="mb-4">
+            <label for="nome" class="form-label">Nome:</label>
+            <input type="text" class="form-control form-control-lg" id="nome" name="nome" required>
+            <div class="invalid-feedback">Por favor, insira o nome.</div>
+        </div>
+
+        <!-- Data de Nascimento -->
+        <div class="mb-4">
+            <label for="data_nascimento" class="form-label">Data de Nascimento:</label>
+            <input type="date" class="form-control form-control-lg" id="data_nascimento" name="data_nascimento" required>
+            <div class="invalid-feedback">Por favor, insira a data de nascimento.</div>
+        </div>
+
+        <!-- Endereço -->
+        <div class="card p-4 mb-4">
+            <h5 class="card-title">Endereço</h5>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="rua" class="form-label">Rua:</label>
+                    <input type="text" class="form-control form-control-lg" id="rua" name="rua" required>
+                    <div class="invalid-feedback">Por favor, insira a rua.</div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="numero" class="form-label">Número:</label>
+                    <input type="text" class="form-control form-control-lg" id="numero" name="numero" required>
+                    <div class="invalid-feedback">Por favor, insira o número.</div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="bairro" class="form-label">Bairro:</label>
+                    <input type="text" class="form-control form-control-lg" id="bairro" name="bairro" required>
+                    <div class="invalid-feedback">Por favor, insira o bairro.</div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="cidade" class="form-label">Cidade:</label>
+                    <input type="text" class="form-control form-control-lg" id="cidade" name="cidade" required>
+                    <div class="invalid-feedback">Por favor, insira a cidade.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Telefone -->
+        <div class="mb-4">
+            <label for="telefone" class="form-label">Telefone:</label>
+            <input type="tel" class="form-control form-control-lg" id="telefone" name="telefone" required>
+            <div class="invalid-feedback">Por favor, insira um número de telefone válido no formato (11)98888-9999.</div>
+        </div>
+
+        <!-- Data prevista para o parto -->
+        <div class="mb-4">
+            <label for="data_parto" class="form-label">Data Prevista para o Parto:</label>
+            <input type="date" class="form-control form-control-lg" id="data_parto" name="data_parto" required>
+            <div class="invalid-feedback">Por favor, insira a data prevista para o parto.</div>
+        </div>
+
+        <!-- Switches de filhos e cônjuge -->
+        <div class="card p-4 mb-4">
+            <h5 class="card-title">Informações Familiares</h5>
+
+            <!-- Possui filhos -->
+            <div class="form-check form-switch mb-3">
+                <input class="form-check-input form-check-lg" type="checkbox" id="filhos_switch" name="filhos" value="sim">
+                <label class="form-check-label" for="filhos_switch">Possui filhos?</label>
+            </div>
+
+            <!-- Possui cônjuge -->
+            <div class="form-check form-switch">
+                <input class="form-check-input form-check-lg" type="checkbox" id="conjuge_switch" name="conjuge" value="sim">
+                <label class="form-check-label" for="conjuge_switch">Possui cônjuge?</label>
+            </div>
+        </div>
+
+        <!-- Bolsa Família -->
+        <div class="mb-4">
+            <label class="form-label">Possui Bolsa Família?</label><br>
+            <div class="form-check form-check-inline">
+                <input type="radio" class="form-check-input" id="bolsa_sim" name="bolsa_familia" value="sim" checked>
+                <label class="form-check-label" for="bolsa_sim">Sim</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input type="radio" class="form-check-input" id="bolsa_nao" name="bolsa_familia" value="nao">
+                <label class="form-check-label" for="bolsa_nao">Não</label>
+            </div>
+        </div>
+
+        <!-- Última data de retirada da cesta básica -->
+        <div class="mb-4">
+            <label for="data_cesta" class="form-label">Última data de retirada da cesta básica:</label>
+            <input type="date" class="form-control form-control-lg" id="data_cesta" name="data_cesta" required>
+            <div class="invalid-feedback">Por favor, insira a data de retirada da cesta básica.</div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg w-100">Cadastrar</button>
+    </form>
+</div>
+{% endblock %}

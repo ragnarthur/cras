@@ -1,0 +1,112 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Editar Gestante - CRAS App{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Editar Gestante</h2>
+
+    <form action="{{ url_for('editar_gestante', gestante_id=gestante['id']) }}" method="POST" class="needs-validation" novalidate>
+        <!-- Nome -->
+        <div class="mb-4">
+            <label for="nome" class="form-label">Nome:</label>
+            <input type="text" class="form-control form-control-lg" id="nome" name="nome" value="{{ gestante['nome'] }}" required style="text-transform: uppercase;">
+            <div class="invalid-feedback">Por favor, insira o nome.</div>
+        </div>
+
+        <!-- Data de Nascimento -->
+        <div class="mb-4">
+            <label for="data_nascimento" class="form-label">Data de Nascimento:</label>
+            <input type="date" class="form-control form-control-lg" id="data_nascimento" name="data_nascimento" value="{{ gestante['data_nascimento'] }}" required>
+            <div class="invalid-feedback">Por favor, insira a data de nascimento.</div>
+        </div>
+
+        <!-- Data Prevista para Parto -->
+        <div class="mb-4">
+            <label for="data_parto" class="form-label">Data Prevista para Parto:</label>
+            <input type="date" class="form-control form-control-lg" id="data_parto" name="data_parto" value="{{ gestante['data_parto'] }}" required>
+            <div class="invalid-feedback">Por favor, insira a data prevista para parto.</div>
+        </div>
+
+        <!-- Endereço -->
+        <div class="card p-4 mb-4">
+            <h5 class="card-title">Endereço</h5>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="rua" class="form-label">Rua:</label>
+                    <input type="text" class="form-control form-control-lg" id="rua" name="rua" value="{{ gestante['endereco'].split(', ')[0] }}" required style="text-transform: uppercase;">
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="numero" class="form-label">Número:</label>
+                    <input type="text" class="form-control form-control-lg" id="numero" name="numero" value="{{ gestante['endereco'].split(', ')[1] }}" required style="text-transform: uppercase;">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="bairro" class="form-label">Bairro:</label>
+                    <input type="text" class="form-control form-control-lg" id="bairro" name="bairro" value="{{ gestante['endereco'].split(', ')[2] }}" required style="text-transform: uppercase;">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="cidade" class="form-label">Cidade:</label>
+                    <input type="text" class="form-control form-control-lg" id="cidade" name="cidade" value="{{ gestante['endereco'].split(', ')[3] }}" required style="text-transform: uppercase;">
+                </div>
+            </div>
+        </div>
+
+        <!-- Campo oculto para juntar o endereço completo -->
+        <input type="hidden" id="endereco_completo" name="endereco">
+
+        <!-- Telefone -->
+        <div class="mb-4">
+            <label for="telefone" class="form-label">Telefone:</label>
+            <input type="tel" class="form-control form-control-lg" id="telefone" name="telefone" value="{{ gestante['telefone'] }}" required>
+        </div>
+
+        <!-- Bolsa Família -->
+        <div class="mb-4">
+            <label class="form-label">Possui Bolsa Família?</label><br>
+            <div class="form-check form-check-inline">
+                <input type="radio" class="form-check-input" id="bolsa_sim" name="bolsa_familia" value="sim" {% if gestante['bolsa_familia'] == 'sim' %}checked{% endif %}>
+                <label class="form-check-label" for="bolsa_sim">Sim</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input type="radio" class="form-check-input" id="bolsa_nao" name="bolsa_familia" value="nao" {% if gestante['bolsa_familia'] == 'nao' %}checked{% endif %}>
+                <label class="form-check-label" for="bolsa_nao">Não</label>
+            </div>
+        </div>
+
+        <!-- Última data de retirada da cesta básica -->
+        <div class="mb-4">
+            <label for="data_cesta" class="form-label">Última data de retirada da cesta básica:</label>
+            <input type="date" class="form-control form-control-lg" id="data_cesta" name="data_cesta" value="{{ gestante['data_cesta'] }}">
+            <div class="invalid-feedback">Por favor, insira a data de retirada da cesta básica.</div>
+        </div>
+
+        <!-- Observações -->
+        <div class="mb-4">
+            <label for="observacoes" class="form-label">Observações:</label>
+            <textarea class="form-control form-control-lg" id="observacoes" name="observacoes" style="text-transform: uppercase;">{{ gestante['observacoes'] or '' }}</textarea>
+        </div>
+
+        <!-- Exibição da próxima data de retirada -->
+        {% if data_proxima_retirada %}
+        <div class="alert alert-info">
+            <strong>Próxima retirada da cesta básica:</strong> {{ data_proxima_retirada.strftime('%d/%m/%Y') }}
+        </div>
+        {% endif %}
+
+        <button type="submit" class="btn btn-primary btn-lg w-100 mb-4">SALVAR ALTERAÇÕES</button>
+    </form>
+</div>
+
+<script>
+    // Ao submeter o formulário, junte o endereço completo
+    document.querySelector('form').addEventListener('submit', function (e) {
+        const rua = document.getElementById('rua').value;
+        const numero = document.getElementById('numero').value;
+        const bairro = document.getElementById('bairro').value;
+        const cidade = document.getElementById('cidade').value;
+
+        const enderecoCompleto = `${rua}, ${numero}, ${bairro}, ${cidade}`;
+        document.getElementById('endereco_completo').value = enderecoCompleto;
+    });
+</script>
+{% endblock %}
