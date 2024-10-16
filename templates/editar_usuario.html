@@ -99,6 +99,63 @@
         </div>
         {% endif %}
 
+        <!-- Switches para adicionar filhos e cônjuge com campos dinâmicos -->
+        <div class="mb-4">
+            <label class="form-label">Deseja adicionar filhos?</label><br>
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="filho_switch" name="cadastrar_filho" value="sim">
+                <label class="form-check-label" for="filho_switch">Sim</label>
+            </div>
+            <!-- Campos dinâmicos para filhos -->
+            <div id="filho_form" style="display: none;">
+                <h5 class="mt-4">Adicionar Filho</h5>
+                <div class="mb-3">
+                    <label for="nome_filho" class="form-label">Nome do Filho:</label>
+                    <input type="text" class="form-control" id="nome_filho" name="nome_filho" placeholder="Nome completo">
+                </div>
+                <div class="mb-3">
+                    <label for="data_nascimento_filho" class="form-label">Data de Nascimento:</label>
+                    <input type="date" class="form-control" id="data_nascimento_filho" name="data_nascimento_filho">
+                </div>
+                <div class="mb-3">
+                    <label for="cpf_filho" class="form-label">CPF:</label>
+                    <input type="text" class="form-control" id="cpf_filho" name="cpf_filho" placeholder="CPF">
+                </div>
+                <div class="mb-3">
+                    <label for="rg_filho" class="form-label">RG:</label>
+                    <input type="text" class="form-control" id="rg_filho" name="rg_filho" placeholder="RG">
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label">Deseja adicionar cônjuge?</label><br>
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="conjuge_switch" name="cadastrar_conjuge" value="sim">
+                <label class="form-check-label" for="conjuge_switch">Sim</label>
+            </div>
+            <!-- Campos dinâmicos para cônjuge -->
+            <div id="conjuge_form" style="display: none;">
+                <h5 class="mt-4">Adicionar Cônjuge</h5>
+                <div class="mb-3">
+                    <label for="nome_conjuge" class="form-label">Nome do Cônjuge:</label>
+                    <input type="text" class="form-control" id="nome_conjuge" name="nome_conjuge" placeholder="Nome completo">
+                </div>
+                <div class="mb-3">
+                    <label for="data_nascimento_conjuge" class="form-label">Data de Nascimento:</label>
+                    <input type="date" class="form-control" id="data_nascimento_conjuge" name="data_nascimento_conjuge">
+                </div>
+                <div class="mb-3">
+                    <label for="cpf_conjuge" class="form-label">CPF:</label>
+                    <input type="text" class="form-control" id="cpf_conjuge" name="cpf_conjuge" placeholder="CPF">
+                </div>
+                <div class="mb-3">
+                    <label for="rg_conjuge" class="form-label">RG:</label>
+                    <input type="text" class="form-control" id="rg_conjuge" name="rg_conjuge" placeholder="RG">
+                </div>
+            </div>
+        </div>
+
         <button type="submit" class="btn btn-primary btn-lg w-100 mb-4">SALVAR ALTERAÇÕES</button>
     </form>
 
@@ -114,7 +171,7 @@
                 {% for filho in filhos %}
                 <li class="list-group-item">
                     <span><strong>{{ filho['nome'] }}</strong> - {{ filho['idade'] }} ANOS</span>
-                    <br> <!-- Adiciona uma quebra de linha para garantir que o botão fique abaixo -->
+                    <br>
                     <a href="{{ url_for('editar_filho', filho_id=filho['id']) }}" class="btn btn-edit mt-2">EDITAR FILHO</a>
                 </li>
                 {% endfor %}
@@ -133,4 +190,54 @@
     </div>
 
 </div>
+
+<script>
+    // Mostrar ou esconder os formulários de filhos e cônjuge dinamicamente
+    document.getElementById('filho_switch').addEventListener('change', function() {
+        const filhoForm = document.getElementById('filho_form');
+        filhoForm.style.display = this.checked ? 'block' : 'none';
+    });
+
+    document.getElementById('conjuge_switch').addEventListener('change', function() {
+        const conjugeForm = document.getElementById('conjuge_form');
+        conjugeForm.style.display = this.checked ? 'block' : 'none';
+    });
+
+    // Máscara para CPF: 111.222.333-44
+    function aplicarMascaraCPF(cpf) {
+        cpf = cpf.replace(/\D/g, '');
+        cpf = cpf.substring(0, 11); // Limita a 11 caracteres numéricos
+        cpf = cpf.replace(/(\d{3})(\d)/, '$1.$2');
+        cpf = cpf.replace(/(\d{3})(\d)/, '$1.$2');
+        cpf = cpf.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+        return cpf;
+    }
+
+    // Máscara para RG: 11.222.333
+    function aplicarMascaraRG(rg) {
+        rg = rg.replace(/\D/g, '');
+        rg = rg.substring(0, 8); // Limita a 8 caracteres numéricos
+        rg = rg.replace(/(\d{2})(\d)/, '$1.$2');
+        rg = rg.replace(/(\d{3})(\d)/, '$1.$2');
+        return rg;
+    }
+
+    // Aplicando máscaras ao digitar
+    document.getElementById('cpf_filho').addEventListener('input', function() {
+        this.value = aplicarMascaraCPF(this.value);
+    });
+    
+    document.getElementById('rg_filho').addEventListener('input', function() {
+        this.value = aplicarMascaraRG(this.value);
+    });
+
+    document.getElementById('cpf_conjuge').addEventListener('input', function() {
+        this.value = aplicarMascaraCPF(this.value);
+    });
+
+    document.getElementById('rg_conjuge').addEventListener('input', function() {
+        this.value = aplicarMascaraRG(this.value);
+    });
+</script>
+
 {% endblock %}

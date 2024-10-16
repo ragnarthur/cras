@@ -7,16 +7,32 @@
     <h2 class="text-center mb-4">Cadastro de Cônjuge</h2>
 
     <form action="{{ url_for('cadastro_conjuge', usuario_id=usuario_id) }}" method="POST" class="needs-validation form-uppercase" novalidate>
+        
+        <!-- Nome do Cônjuge -->
         <div class="mb-4">
             <label for="nome_conjuge" class="form-label">Nome do Cônjuge:</label>
             <input type="text" class="form-control form-control-lg" id="nome_conjuge" name="nome_conjuge" required>
             <div class="invalid-feedback">Por favor, insira o nome do cônjuge.</div>
         </div>
 
+        <!-- Data de Nascimento do Cônjuge -->
         <div class="mb-4">
             <label for="data_nascimento_conjuge" class="form-label">Data de Nascimento do Cônjuge:</label>
             <input type="date" class="form-control" id="data_nascimento_conjuge" name="data_nascimento_conjuge" required>
             <div class="invalid-feedback">Por favor, insira a data de nascimento do cônjuge.</div>
+        </div>
+
+        <!-- CPF e RG do Cônjuge -->
+        <div class="mb-4">
+            <label for="cpf_conjuge" class="form-label">CPF do Cônjuge:</label>
+            <input type="text" class="form-control form-control-lg" id="cpf_conjuge" name="cpf_conjuge" required>
+            <div class="invalid-feedback">Por favor, insira o CPF do cônjuge.</div>
+        </div>
+
+        <div class="mb-4">
+            <label for="rg_conjuge" class="form-label">RG do Cônjuge:</label>
+            <input type="text" class="form-control form-control-lg" id="rg_conjuge" name="rg_conjuge" required>
+            <div class="invalid-feedback">Por favor, insira o RG do cônjuge.</div>
         </div>
 
         <!-- Campo para idade do cônjuge, preenchido automaticamente -->
@@ -43,5 +59,34 @@
 
         document.getElementById('idade_conjuge').value = idade >= 0 ? idade : '';
     });
+
+    // Máscara para CPF: 111.222.333-44
+    function aplicarMascaraCPF(cpf) {
+        cpf = cpf.replace(/\D/g, '');
+        cpf = cpf.substring(0, 11); // Limita a 11 caracteres numéricos
+        cpf = cpf.replace(/(\d{3})(\d)/, '$1.$2');
+        cpf = cpf.replace(/(\d{3})(\d)/, '$1.$2');
+        cpf = cpf.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+        return cpf;
+    }
+
+    // Máscara para RG: 11.222.333
+    function aplicarMascaraRG(rg) {
+        rg = rg.replace(/\D/g, '');
+        rg = rg.substring(0, 8); // Limita a 8 caracteres numéricos
+        rg = rg.replace(/(\d{2})(\d)/, '$1.$2');
+        rg = rg.replace(/(\d{3})(\d)/, '$1.$2');
+        return rg;
+    }
+
+    // Aplicando máscaras ao digitar CPF e RG
+    document.getElementById('cpf_conjuge').addEventListener('input', function() {
+        this.value = aplicarMascaraCPF(this.value);
+    });
+
+    document.getElementById('rg_conjuge').addEventListener('input', function() {
+        this.value = aplicarMascaraRG(this.value);
+    });
 </script>
+
 {% endblock %}

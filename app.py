@@ -188,16 +188,12 @@ def editar_usuario(nome_usuario):
     if not usuario:
         return redirect(url_for('pesquisar_usuario'))
 
-    # Calcular a data da próxima retirada, se houver data da última retirada
-    if usuario['data_cesta']:
-        ultima_data = datetime.strptime(usuario['data_cesta'], '%Y-%m-%d')
-        data_proxima_retirada = ultima_data + timedelta(days=90)
-    else:
-        data_proxima_retirada = None
-
     if request.method == 'POST':
+        # Atualizar dados do usuário
         nome = request.form['nome']
         data_nascimento = request.form['data_nascimento']
+        cpf = request.form['cpf']
+        rg = request.form['rg']
         rua = request.form['rua']
         numero = request.form['numero']
         bairro = request.form['bairro']
@@ -212,17 +208,45 @@ def editar_usuario(nome_usuario):
                 INSERT INTO observacoes (usuario_id, observacao, data_observacao) 
                 VALUES (?, ?, ?)
             """, (usuario['id'], nova_observacao, datetime.now().strftime('%Y-%m-%d')))
-        
+
         cursor.execute("""
-            UPDATE usuarios SET nome = ?, data_nascimento = ?, endereco = ?, telefone = ?, 
+            UPDATE usuarios SET nome = ?, data_nascimento = ?, cpf = ?, rg = ?, endereco = ?, telefone = ?, 
             bolsa_familia = ?, data_cesta = ? WHERE nome = ?
         """, (
-            nome, data_nascimento, f"{rua}, {numero}, {bairro}, {cidade}", telefone,
+            nome, data_nascimento, cpf, rg, f"{rua}, {numero}, {bairro}, {cidade}", telefone,
             bolsa_familia, data_cesta, nome_usuario
         ))
+
+        # Verificar e adicionar cônjuge, se necessário
+        cadastrar_conjuge = request.form.get('cadastrar_conjuge')
+        if cadastrar_conjuge == 'sim':
+            nome_conjuge = request.form.get('nome_conjuge')
+            data_nascimento_conjuge = request.form.get('data_nascimento_conjuge')
+            cpf_conjuge = request.form.get('cpf_conjuge')
+            rg_conjuge = request.form.get('rg_conjuge')
+
+            cursor.execute("""
+                INSERT OR REPLACE INTO conjuge (nome, data_nascimento, cpf, rg, usuario_id)
+                VALUES (?, ?, ?, ?, ?)
+            """, (nome_conjuge, data_nascimento_conjuge, cpf_conjuge, rg_conjuge, usuario['id']))
+
+        # Verificar e adicionar filhos, se necessário
+        cadastrar_filho = request.form.get('cadastrar_filho')
+        if cadastrar_filho == 'sim':
+            nome_filho = request.form.get('nome_filho')
+            data_nascimento_filho = request.form.get('data_nascimento_filho')
+            cpf_filho = request.form.get('cpf_filho')
+            rg_filho = request.form.get('rg_filho')
+
+            cursor.execute("""
+                INSERT INTO filhos (nome, data_nascimento, cpf, rg, usuario_id)
+                VALUES (?, ?, ?, ?, ?)
+            """, (nome_filho, data_nascimento_filho, cpf_filho, rg_filho, usuario['id']))
+
         g.db.commit()
         return redirect(url_for('pesquisar_usuario'))
 
+    # Carregar filhos, cônjuge e observações
     cursor.execute("SELECT * FROM filhos WHERE usuario_id = ?", (usuario['id'],))
     filhos = cursor.fetchall()
 
@@ -238,9 +262,19 @@ def editar_usuario(nome_usuario):
         observacao_dict['data_observacao'] = datetime.strptime(observacao_dict['data_observacao'], '%Y-%m-%d')
         observacoes_corrigidas.append(observacao_dict)
 
-    # Passar data_proxima_retirada para o template
-    return render_template('editar_usuario.html', usuario=usuario, filhos=filhos, conjuge=conjuge, 
-                           observacoes=observacoes_corrigidas, data_proxima_retirada=data_proxima_retirada)
+    # Calcular a próxima data de retirada, se aplicável
+    if usuario['data_cesta']:
+        ultima_data_cesta = datetime.strptime(usuario['data_cesta'], '%Y-%m-%d')
+        data_proxima_retirada = ultima_data_cesta + timedelta(days=90)
+    else:
+        data_proxima_retirada = None
+
+    return render_template('editar_usuario.html', 
+                           usuario=usuario, 
+                           filhos=filhos, 
+                           conjuge=conjuge, 
+                           observacoes=observacoes_corrigidas,
+                           data_proxima_retirada=data_proxima_retirada)
 
 @app.route('/editar_filho/<int:filho_id>', methods=['GET', 'POST'])
 def editar_filho(filho_id):
@@ -339,16 +373,15 @@ def editar_gestante(gestante_id):
     cursor.execute("SELECT * FROM gestantes WHERE id = ?", (gestante_id,))
     gestante = cursor.fetchone()
 
-    # Calcular a data da próxima retirada, se houver data da última retirada
-    if gestante['data_cesta']:
-        ultima_data = datetime.strptime(gestante['data_cesta'], '%Y-%m-%d')
-        data_proxima_retirada = ultima_data + timedelta(days=90)
-    else:
-        data_proxima_retirada = None
+    if not gestante:
+        return redirect(url_for('pesquisar_gestantes'))
 
     if request.method == 'POST':
+        # Atualizar dados da gestante
         nome = request.form['nome']
         data_nascimento = request.form['data_nascimento']
+        cpf = request.form['cpf']
+        rg = request.form['rg']
         endereco = request.form['endereco']
         telefone = request.form['telefone']
         data_parto = request.form['data_parto']
@@ -358,19 +391,52 @@ def editar_gestante(gestante_id):
         nova_observacao = request.form.get('nova_observacao')
         if nova_observacao:
             cursor.execute("""
-                INSERT INTO observacoes (gestante_id, observacao, data_observacao) 
+                INSERT INTO observacoes (usuario_id, observacao, data_observacao) 
                 VALUES (?, ?, ?)
             """, (gestante['id'], nova_observacao, datetime.now().strftime('%Y-%m-%d')))
 
         cursor.execute("""
-            UPDATE gestantes SET nome = ?, data_nascimento = ?, endereco = ?, telefone = ?, 
+            UPDATE gestantes SET nome = ?, data_nascimento = ?, cpf = ?, rg = ?, endereco = ?, telefone = ?, 
             data_parto = ?, bolsa_familia = ?, data_cesta = ? WHERE id = ?
-        """, (nome, data_nascimento, endereco, telefone, data_parto, bolsa_familia, data_cesta, gestante_id))
-        g.db.commit()
+        """, (nome, data_nascimento, cpf, rg, endereco, telefone, data_parto, bolsa_familia, data_cesta, gestante_id))
 
+        # Verificar e adicionar cônjuge, se necessário
+        cadastrar_conjuge = request.form.get('cadastrar_conjuge')
+        if cadastrar_conjuge == 'sim':
+            nome_conjuge = request.form.get('nome_conjuge')
+            data_nascimento_conjuge = request.form.get('data_nascimento_conjuge')
+            cpf_conjuge = request.form.get('cpf_conjuge')
+            rg_conjuge = request.form.get('rg_conjuge')
+
+            cursor.execute("""
+                INSERT OR REPLACE INTO conjuge (nome, data_nascimento, cpf, rg, usuario_id)
+                VALUES (?, ?, ?, ?, ?)
+            """, (nome_conjuge, data_nascimento_conjuge, cpf_conjuge, rg_conjuge, gestante['id']))
+
+        # Verificar e adicionar filhos, se necessário
+        cadastrar_filho = request.form.get('cadastrar_filho')
+        if cadastrar_filho == 'sim':
+            nome_filho = request.form.get('nome_filho')
+            data_nascimento_filho = request.form.get('data_nascimento_filho')
+            cpf_filho = request.form.get('cpf_filho')
+            rg_filho = request.form.get('rg_filho')
+
+            cursor.execute("""
+                INSERT INTO filhos (nome, data_nascimento, cpf, rg, usuario_id)
+                VALUES (?, ?, ?, ?, ?)
+            """, (nome_filho, data_nascimento_filho, cpf_filho, rg_filho, gestante['id']))
+
+        g.db.commit()
         return redirect(url_for('pesquisar_gestantes'))
 
-    cursor.execute("SELECT observacao, data_observacao FROM observacoes WHERE gestante_id = ?", (gestante['id'],))
+    # Carregar observações, filhos e cônjuge
+    cursor.execute("SELECT * FROM filhos WHERE usuario_id = ?", (gestante['id'],))
+    filhos = cursor.fetchall()
+
+    cursor.execute("SELECT * FROM conjuge WHERE usuario_id = ?", (gestante['id'],))
+    conjuge = cursor.fetchone()
+
+    cursor.execute("SELECT observacao, data_observacao FROM observacoes WHERE usuario_id = ?", (gestante['id'],))
     observacoes = cursor.fetchall()
 
     observacoes_corrigidas = []
@@ -379,8 +445,19 @@ def editar_gestante(gestante_id):
         observacao_dict['data_observacao'] = datetime.strptime(observacao_dict['data_observacao'], '%Y-%m-%d')
         observacoes_corrigidas.append(observacao_dict)
 
-    return render_template('editar_gestante.html', gestante=gestante, 
-                           observacoes=observacoes_corrigidas, data_proxima_retirada=data_proxima_retirada)
+    # Calcular a próxima data de retirada, se aplicável
+    if gestante['data_cesta']:
+        ultima_data_cesta = datetime.strptime(gestante['data_cesta'], '%Y-%m-%d')
+        data_proxima_retirada = ultima_data_cesta + timedelta(days=30)  # Intervalo de 30 dias para gestantes
+    else:
+        data_proxima_retirada = None
+
+    return render_template('editar_gestante.html', 
+                           gestante=gestante, 
+                           filhos=filhos, 
+                           conjuge=conjuge, 
+                           observacoes=observacoes_corrigidas, 
+                           data_proxima_retirada=data_proxima_retirada)
 
 # Rotas de Pesquisa de Usuários e Gestantes
 @app.route('/pesquisar_usuario', methods=['GET', 'POST'])

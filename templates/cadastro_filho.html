@@ -1,5 +1,4 @@
-﻿<!-- templates/cadastro_filho.html -->
-{% extends "base.html" %}
+﻿{% extends "base.html" %}
 
 {% block title %}Cadastro de Filho - CRAS App{% endblock %}
 
@@ -9,16 +8,32 @@
 
     <form action="{{ url_for('cadastro_filho', usuario_id=usuario_id) }}" method="POST" class="needs-validation form-uppercase" novalidate>
         <input type="hidden" name="usuario_id" value="{{ usuario_id }}">
+        
+        <!-- Nome do Filho -->
         <div class="mb-4">
             <label for="nome_filho" class="form-label">Nome do Filho:</label>
             <input type="text" class="form-control form-control-lg" id="nome_filho" name="nome_filho" required>
             <div class="invalid-feedback">Por favor, insira o nome do filho.</div>
         </div>
 
+        <!-- Data de Nascimento do Filho -->
         <div class="mb-4">
             <label for="data_nascimento_filho" class="form-label">Data de Nascimento do Filho:</label>
             <input type="date" class="form-control" id="data_nascimento_filho" name="data_nascimento_filho" required>
             <div class="invalid-feedback">Por favor, insira a data de nascimento do filho.</div>
+        </div>
+
+        <!-- CPF e RG do Filho -->
+        <div class="mb-4">
+            <label for="cpf_filho" class="form-label">CPF do Filho:</label>
+            <input type="text" class="form-control form-control-lg" id="cpf_filho" name="cpf_filho">
+            <div class="invalid-feedback">Por favor, insira o CPF do filho.</div>
+        </div>
+
+        <div class="mb-4">
+            <label for="rg_filho" class="form-label">RG do Filho:</label>
+            <input type="text" class="form-control form-control-lg" id="rg_filho" name="rg_filho">
+            <div class="invalid-feedback">Por favor, insira o RG do filho.</div>
         </div>
 
         <!-- Campo para idade do filho, preenchido automaticamente -->
@@ -27,6 +42,7 @@
             <input type="number" class="form-control" id="idade_filho" name="idade_filho" readonly>
         </div>
 
+        <!-- Switch para cadastrar outro filho -->
         <div class="form-check form-switch mb-3">
             <input class="form-check-input" type="checkbox" id="cadastrar_outro" name="cadastrar_outro" value="sim">
             <label class="form-check-label" for="cadastrar_outro">Cadastrar outro filho?</label>
@@ -50,5 +66,34 @@
 
         document.getElementById('idade_filho').value = idade >= 0 ? idade : '';
     });
+
+    // Máscara para CPF: 111.222.333-44
+    function aplicarMascaraCPF(cpf) {
+        cpf = cpf.replace(/\D/g, '');
+        cpf = cpf.substring(0, 11); // Limita a 11 caracteres numéricos
+        cpf = cpf.replace(/(\d{3})(\d)/, '$1.$2');
+        cpf = cpf.replace(/(\d{3})(\d)/, '$1.$2');
+        cpf = cpf.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+        return cpf;
+    }
+
+    // Máscara para RG: 11.222.333
+    function aplicarMascaraRG(rg) {
+        rg = rg.replace(/\D/g, '');
+        rg = rg.substring(0, 8); // Limita a 8 caracteres numéricos
+        rg = rg.replace(/(\d{2})(\d)/, '$1.$2');
+        rg = rg.replace(/(\d{3})(\d)/, '$1.$2');
+        return rg;
+    }
+
+    // Aplicando máscaras ao digitar CPF e RG
+    document.getElementById('cpf_filho').addEventListener('input', function() {
+        this.value = aplicarMascaraCPF(this.value);
+    });
+
+    document.getElementById('rg_filho').addEventListener('input', function() {
+        this.value = aplicarMascaraRG(this.value);
+    });
 </script>
+
 {% endblock %}

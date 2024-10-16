@@ -21,6 +21,19 @@
             <div class="invalid-feedback">Por favor, insira a data de nascimento.</div>
         </div>
 
+        <!-- CPF e RG -->
+        <div class="mb-4">
+            <label for="cpf" class="form-label">CPF:</label>
+            <input type="text" class="form-control form-control-lg" id="cpf" name="cpf" required>
+            <div class="invalid-feedback">Por favor, insira o CPF.</div>
+        </div>
+
+        <div class="mb-4">
+            <label for="rg" class="form-label">RG:</label>
+            <input type="text" class="form-control form-control-lg" id="rg" name="rg" required>
+            <div class="invalid-feedback">Por favor, insira o RG.</div>
+        </div>
+
         <!-- Endereço -->
         <div class="card p-4 mb-4">
             <h5 class="card-title">Endereço</h5>
@@ -62,7 +75,7 @@
             <div class="invalid-feedback">Por favor, insira a data prevista para o parto.</div>
         </div>
 
-        <!-- Switches de filhos e cônjuge -->
+        <!-- Informações Familiares -->
         <div class="card p-4 mb-4">
             <h5 class="card-title">Informações Familiares</h5>
 
@@ -102,4 +115,34 @@
         <button type="submit" class="btn btn-primary btn-lg w-100">Cadastrar</button>
     </form>
 </div>
+
+<script>
+    // Máscara para CPF: 111.222.333-44
+    function aplicarMascaraCPF(cpf) {
+        cpf = cpf.replace(/\D/g, '');
+        cpf = cpf.substring(0, 11); // Limita a 11 caracteres numéricos
+        cpf = cpf.replace(/(\d{3})(\d)/, '$1.$2');
+        cpf = cpf.replace(/(\d{3})(\d)/, '$1.$2');
+        cpf = cpf.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+        return cpf;
+    }
+
+    // Máscara para RG: 11.222.333
+    function aplicarMascaraRG(rg) {
+        rg = rg.replace(/\D/g, '');
+        rg = rg.substring(0, 8); // Limita a 8 caracteres numéricos
+        rg = rg.replace(/(\d{2})(\d)/, '$1.$2');
+        rg = rg.replace(/(\d{3})(\d)/, '$1.$2');
+        return rg;
+    }
+
+    document.getElementById('cpf').addEventListener('input', function() {
+        this.value = aplicarMascaraCPF(this.value);
+    });
+
+    document.getElementById('rg').addEventListener('input', function() {
+        this.value = aplicarMascaraRG(this.value);
+    });
+</script>
+
 {% endblock %}
