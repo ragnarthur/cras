@@ -14,6 +14,20 @@
             <div class="invalid-feedback">Por favor, insira o nome.</div>
         </div>
 
+        <!-- CPF -->
+        <div class="mb-4">
+            <label for="cpf" class="form-label">CPF:</label>
+            <input type="text" class="form-control form-control-lg" id="cpf" name="cpf" value="{{ usuario['cpf'] }}" placeholder="CPF" maxlength="14" required>
+            <div class="invalid-feedback">Por favor, insira o CPF.</div>
+        </div>
+
+        <!-- RG -->
+        <div class="mb-4">
+            <label for="rg_usuario" class="form-label">RG:</label>
+            <input type="text" class="form-control form-control-lg" id="rg_usuario" name="rg" value="{{ usuario['rg'] }}" placeholder="RG" maxlength="12" required>
+            <div class="invalid-feedback">Por favor, insira o RG.</div>
+        </div>
+
         <!-- Data de Nascimento -->
         <div class="mb-4">
             <label for="data_nascimento" class="form-label">Data de Nascimento:</label>
@@ -92,13 +106,6 @@
             <textarea class="form-control form-control-lg" id="nova_observacao" name="nova_observacao" placeholder="Insira uma nova observação" style="text-transform: uppercase;"></textarea>
         </div>
 
-        <!-- Exibição da próxima data de retirada -->
-        {% if data_proxima_retirada is not none %}
-        <div class="alert alert-info">
-            <strong>Próxima retirada da cesta básica:</strong> {{ data_proxima_retirada.strftime('%d/%m/%Y') }}
-        </div>
-        {% endif %}
-
         <!-- Switches para adicionar filhos e cônjuge com campos dinâmicos -->
         <div class="mb-4">
             <label class="form-label">Deseja adicionar filhos?</label><br>
@@ -111,7 +118,7 @@
                 <h5 class="mt-4">Adicionar Filho</h5>
                 <div class="mb-3">
                     <label for="nome_filho" class="form-label">Nome do Filho:</label>
-                    <input type="text" class="form-control" id="nome_filho" name="nome_filho" placeholder="Nome completo">
+                    <input type="text" class="form-control" id="nome_filho" name="nome_filho" placeholder="Nome completo" style="text-transform: uppercase;">
                 </div>
                 <div class="mb-3">
                     <label for="data_nascimento_filho" class="form-label">Data de Nascimento:</label>
@@ -139,7 +146,7 @@
                 <h5 class="mt-4">Adicionar Cônjuge</h5>
                 <div class="mb-3">
                     <label for="nome_conjuge" class="form-label">Nome do Cônjuge:</label>
-                    <input type="text" class="form-control" id="nome_conjuge" name="nome_conjuge" placeholder="Nome completo">
+                    <input type="text" class="form-control" id="nome_conjuge" name="nome_conjuge" placeholder="Nome completo" style="text-transform: uppercase;">
                 </div>
                 <div class="mb-3">
                     <label for="data_nascimento_conjuge" class="form-label">Data de Nascimento:</label>
@@ -183,7 +190,7 @@
         {% if conjuge %}
         <div class="mb-3">
             <h5 class="card-title-edit">Cônjuge</h5>
-            <p><strong>{{ conjuge['nome'] }}</strong> - {{ conjuge['data_nascimento'] }}</p>
+            <p><strong>{{ conjuge['nome'] }}</strong></p>
             <a href="{{ url_for('editar_conjuge', usuario_id=usuario['id']) }}" class="btn btn-edit">EDITAR CÔNJUGE</a>
         </div>
         {% endif %}
@@ -192,52 +199,62 @@
 </div>
 
 <script>
-    // Mostrar ou esconder os formulários de filhos e cônjuge dinamicamente
-    document.getElementById('filho_switch').addEventListener('change', function() {
-        const filhoForm = document.getElementById('filho_form');
-        filhoForm.style.display = this.checked ? 'block' : 'none';
-    });
-
-    document.getElementById('conjuge_switch').addEventListener('change', function() {
-        const conjugeForm = document.getElementById('conjuge_form');
-        conjugeForm.style.display = this.checked ? 'block' : 'none';
-    });
-
     // Máscara para CPF: 111.222.333-44
     function aplicarMascaraCPF(cpf) {
-        cpf = cpf.replace(/\D/g, '');
-        cpf = cpf.substring(0, 11); // Limita a 11 caracteres numéricos
+        cpf = cpf.replace(/\D/g, ''); // Remove todos os caracteres que não são dígitos
+        if (cpf.length > 11) cpf = cpf.substring(0, 11); // Limita a 11 dígitos numéricos
         cpf = cpf.replace(/(\d{3})(\d)/, '$1.$2');
         cpf = cpf.replace(/(\d{3})(\d)/, '$1.$2');
         cpf = cpf.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
         return cpf;
     }
 
-    // Máscara para RG: 11.222.333
+    // Máscara para RG: 11.222.333 (máximo de 8 dígitos, ignorando os pontos)
     function aplicarMascaraRG(rg) {
-        rg = rg.replace(/\D/g, '');
-        rg = rg.substring(0, 8); // Limita a 8 caracteres numéricos
-        rg = rg.replace(/(\d{2})(\d)/, '$1.$2');
-        rg = rg.replace(/(\d{3})(\d)/, '$1.$2');
+        rg = rg.replace(/\D/g, ''); // Remove todos os caracteres que não são dígitos
+        rg = rg.substring(0, 8); // Limita a 8 dígitos numéricos (somente números)
+        if (rg.length > 2) rg = rg.replace(/(\d{2})(\d)/, '$1.$2'); // Adiciona o primeiro ponto após 2 dígitos
+        if (rg.length > 5) rg = rg.replace(/(\d{3})(\d)/, '$1.$2'); // Adiciona o segundo ponto após 5 dígitos
         return rg;
     }
 
-    // Aplicando máscaras ao digitar
-    document.getElementById('cpf_filho').addEventListener('input', function() {
-        this.value = aplicarMascaraCPF(this.value);
-    });
-    
-    document.getElementById('rg_filho').addEventListener('input', function() {
-        this.value = aplicarMascaraRG(this.value);
-    });
-
-    document.getElementById('cpf_conjuge').addEventListener('input', function() {
+    // Aplicando máscaras ao digitar no campo de CPF e RG do usuário
+    document.getElementById('cpf').addEventListener('input', function() {
         this.value = aplicarMascaraCPF(this.value);
     });
 
-    document.getElementById('rg_conjuge').addEventListener('input', function() {
-        this.value = aplicarMascaraRG(this.value);
+    // Aplicando a máscara no campo RG do usuário
+    document.getElementById('rg_usuario').addEventListener('input', function() {
+        this.value = aplicarMascaraRG(this.value); // Aplica a máscara de RG no campo de RG do usuário
+    });
+
+    // Aplicar máscaras nos campos dinâmicos ao abrir o formulário de filhos e cônjuge
+    document.getElementById('filho_switch').addEventListener('change', function() {
+        const filhoForm = document.getElementById('filho_form');
+        filhoForm.style.display = this.checked ? 'block' : 'none';
+
+        // Aplica a máscara de CPF e RG quando o formulário de filhos aparecer
+        document.getElementById('cpf_filho').addEventListener('input', function() {
+            this.value = aplicarMascaraCPF(this.value);
+        });
+        document.getElementById('rg_filho').addEventListener('input', function() {
+            this.value = aplicarMascaraRG(this.value);
+        });
+    });
+
+    document.getElementById('conjuge_switch').addEventListener('change', function() {
+        const conjugeForm = document.getElementById('conjuge_form');
+        conjugeForm.style.display = this.checked ? 'block' : 'none';
+
+        // Aplica a máscara de CPF e RG quando o formulário de cônjuge aparecer
+        document.getElementById('cpf_conjuge').addEventListener('input', function() {
+            this.value = aplicarMascaraCPF(this.value);
+        });
+        document.getElementById('rg_conjuge').addEventListener('input', function() {
+            this.value = aplicarMascaraRG(this.value);
+        });
     });
 </script>
+
 
 {% endblock %}

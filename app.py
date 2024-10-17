@@ -192,8 +192,6 @@ def editar_usuario(nome_usuario):
         # Atualizar dados do usuário
         nome = request.form['nome']
         data_nascimento = request.form['data_nascimento']
-        cpf = request.form['cpf']
-        rg = request.form['rg']
         rua = request.form['rua']
         numero = request.form['numero']
         bairro = request.form['bairro']
@@ -202,51 +200,58 @@ def editar_usuario(nome_usuario):
         bolsa_familia = request.form['bolsa_familia']
         data_cesta = request.form['data_cesta']
 
+        # Adicionar observação, se existir
         nova_observacao = request.form.get('nova_observacao')
         if nova_observacao:
             cursor.execute("""
                 INSERT INTO observacoes (usuario_id, observacao, data_observacao) 
                 VALUES (?, ?, ?)
             """, (usuario['id'], nova_observacao, datetime.now().strftime('%Y-%m-%d')))
-
+        
+        # Atualizar usuário
         cursor.execute("""
-            UPDATE usuarios SET nome = ?, data_nascimento = ?, cpf = ?, rg = ?, endereco = ?, telefone = ?, 
+            UPDATE usuarios SET nome = ?, data_nascimento = ?, endereco = ?, telefone = ?, 
             bolsa_familia = ?, data_cesta = ? WHERE nome = ?
         """, (
-            nome, data_nascimento, cpf, rg, f"{rua}, {numero}, {bairro}, {cidade}", telefone,
+            nome, data_nascimento, f"{rua}, {numero}, {bairro}, {cidade}", telefone,
             bolsa_familia, data_cesta, nome_usuario
         ))
+
+        # Verificar e adicionar filho, se necessário
+        cadastrar_filho = request.form.get('cadastrar_filho')
+        if cadastrar_filho == 'sim':
+            nome_filho = request.form.get('nome_filho')
+            data_nascimento_filho = request.form.get('data_nascimento_filho')
+            cpf_filho = request.form.get('cpf_filho') or None  # Garantir que seja opcional
+            rg_filho = request.form.get('rg_filho') or None    # Garantir que seja opcional
+
+            # Calcular a idade do filho com base na data de nascimento
+            data_nascimento_filho_date = datetime.strptime(data_nascimento_filho, '%Y-%m-%d')
+            hoje = datetime.now()
+            idade_filho = hoje.year - data_nascimento_filho_date.year - ((hoje.month, hoje.day) < (data_nascimento_filho_date.month, data_nascimento_filho_date.day))
+
+            cursor.execute("""
+                INSERT INTO filhos (nome, data_nascimento, cpf, rg, idade, usuario_id)
+                VALUES (?, ?, ?, ?, ?, ?)
+            """, (nome_filho, data_nascimento_filho, cpf_filho, rg_filho, idade_filho, usuario['id']))
 
         # Verificar e adicionar cônjuge, se necessário
         cadastrar_conjuge = request.form.get('cadastrar_conjuge')
         if cadastrar_conjuge == 'sim':
             nome_conjuge = request.form.get('nome_conjuge')
             data_nascimento_conjuge = request.form.get('data_nascimento_conjuge')
-            cpf_conjuge = request.form.get('cpf_conjuge')
-            rg_conjuge = request.form.get('rg_conjuge')
+            cpf_conjuge = request.form.get('cpf_conjuge') or None
+            rg_conjuge = request.form.get('rg_conjuge') or None
 
             cursor.execute("""
                 INSERT OR REPLACE INTO conjuge (nome, data_nascimento, cpf, rg, usuario_id)
                 VALUES (?, ?, ?, ?, ?)
             """, (nome_conjuge, data_nascimento_conjuge, cpf_conjuge, rg_conjuge, usuario['id']))
 
-        # Verificar e adicionar filhos, se necessário
-        cadastrar_filho = request.form.get('cadastrar_filho')
-        if cadastrar_filho == 'sim':
-            nome_filho = request.form.get('nome_filho')
-            data_nascimento_filho = request.form.get('data_nascimento_filho')
-            cpf_filho = request.form.get('cpf_filho')
-            rg_filho = request.form.get('rg_filho')
-
-            cursor.execute("""
-                INSERT INTO filhos (nome, data_nascimento, cpf, rg, usuario_id)
-                VALUES (?, ?, ?, ?, ?)
-            """, (nome_filho, data_nascimento_filho, cpf_filho, rg_filho, usuario['id']))
-
         g.db.commit()
         return redirect(url_for('pesquisar_usuario'))
 
-    # Carregar filhos, cônjuge e observações
+    # Carregar filhos, conjuge e observações
     cursor.execute("SELECT * FROM filhos WHERE usuario_id = ?", (usuario['id'],))
     filhos = cursor.fetchall()
 
