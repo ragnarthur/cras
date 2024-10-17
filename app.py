@@ -387,7 +387,7 @@ def editar_gestante(gestante_id):
         data_nascimento = request.form['data_nascimento']
         cpf = request.form['cpf']
         rg = request.form['rg']
-        endereco = request.form['endereco']
+        endereco = f"{request.form['rua']}, {request.form['numero']}, {request.form['bairro']}, {request.form['cidade']}"
         telefone = request.form['telefone']
         data_parto = request.form['data_parto']
         bolsa_familia = request.form['bolsa_familia']
@@ -426,10 +426,22 @@ def editar_gestante(gestante_id):
             cpf_filho = request.form.get('cpf_filho')
             rg_filho = request.form.get('rg_filho')
 
-            cursor.execute("""
-                INSERT INTO filhos (nome, data_nascimento, cpf, rg, usuario_id)
-                VALUES (?, ?, ?, ?, ?)
-            """, (nome_filho, data_nascimento_filho, cpf_filho, rg_filho, gestante['id']))
+            # Calcular a idade do filho
+            if data_nascimento_filho:
+                data_nascimento_filho_date = datetime.strptime(data_nascimento_filho, '%Y-%m-%d')
+                hoje = datetime.now()
+                idade_filho = hoje.year - data_nascimento_filho_date.year - ((hoje.month, hoje.day) < (data_nascimento_filho_date.month, data_nascimento_filho_date.day))
+            else:
+                idade_filho = None  # Se não houver data de nascimento, idade será None
+
+            # Verificar se a idade foi calculada corretamente
+            if idade_filho is not None:
+                cursor.execute("""
+                    INSERT INTO filhos (nome, data_nascimento, cpf, rg, idade, usuario_id)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                """, (nome_filho, data_nascimento_filho, cpf_filho, rg_filho, idade_filho, gestante['id']))
+            else:
+                return "Erro: A idade do filho não pode ser calculada."
 
         g.db.commit()
         return redirect(url_for('pesquisar_gestantes'))
