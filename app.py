@@ -192,10 +192,9 @@ def editar_usuario(nome_usuario):
         # Atualizar dados do usuário
         nome = request.form['nome']
         data_nascimento = request.form['data_nascimento']
-        rua = request.form['rua']
-        numero = request.form['numero']
-        bairro = request.form['bairro']
-        cidade = request.form['cidade']
+        cpf = request.form['cpf']
+        rg = request.form['rg']
+        endereco = f"{request.form['rua']}, {request.form['numero']}, {request.form['bairro']}, {request.form['cidade']}"
         telefone = request.form['telefone']
         bolsa_familia = request.form['bolsa_familia']
         data_cesta = request.form['data_cesta']
@@ -210,10 +209,10 @@ def editar_usuario(nome_usuario):
         
         # Atualizar usuário
         cursor.execute("""
-            UPDATE usuarios SET nome = ?, data_nascimento = ?, endereco = ?, telefone = ?, 
+            UPDATE usuarios SET nome = ?, data_nascimento = ?, cpf = ?, rg = ?, endereco = ?, telefone = ?, 
             bolsa_familia = ?, data_cesta = ? WHERE nome = ?
         """, (
-            nome, data_nascimento, f"{rua}, {numero}, {bairro}, {cidade}", telefone,
+            nome, data_nascimento, cpf, rg, endereco, telefone,
             bolsa_familia, data_cesta, nome_usuario
         ))
 
