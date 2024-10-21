@@ -4,41 +4,48 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h2 class="text-center mb-4">Cadastro de Cônjuge</h2>
+    <h2 class="text-center mb-4" style="font-size: 2rem; font-weight: bold; letter-spacing: 0.05rem;">Cadastro de Cônjuge</h2>
 
     <form action="{{ url_for('cadastro_conjuge', usuario_id=usuario_id) }}" method="POST" class="needs-validation form-uppercase" novalidate>
         
-        <!-- Nome do Cônjuge -->
-        <div class="mb-4">
-            <label for="nome_conjuge" class="form-label">Nome do Cônjuge:</label>
-            <input type="text" class="form-control form-control-lg" id="nome_conjuge" name="nome_conjuge" required>
-            <div class="invalid-feedback">Por favor, insira o nome do cônjuge.</div>
-        </div>
+        <!-- Box para informações pessoais do cônjuge -->
+        <div class="card p-4 mb-4">
+            <h5 class="card-title" style="font-size: 1.5rem; font-weight: bold; color: #0d6efd;">Informações Pessoais do Cônjuge</h5>
+            <div class="row">
+                <!-- Nome do Cônjuge -->
+                <div class="col-md-6 mb-3">
+                    <label for="nome_conjuge" class="form-label" style="font-size: 1.2rem; font-weight: bold;">Nome do Cônjuge:</label>
+                    <input type="text" class="form-control form-control-lg" id="nome_conjuge" name="nome_conjuge" required>
+                    <div class="invalid-feedback" style="font-size: 1.1rem;">Por favor, insira o nome do cônjuge.</div>
+                </div>
 
-        <!-- Data de Nascimento do Cônjuge -->
-        <div class="mb-4">
-            <label for="data_nascimento_conjuge" class="form-label">Data de Nascimento do Cônjuge:</label>
-            <input type="date" class="form-control" id="data_nascimento_conjuge" name="data_nascimento_conjuge" required>
-            <div class="invalid-feedback">Por favor, insira a data de nascimento do cônjuge.</div>
-        </div>
+                <!-- Data de Nascimento do Cônjuge -->
+                <div class="col-md-6 mb-3">
+                    <label for="data_nascimento_conjuge" class="form-label" style="font-size: 1.2rem; font-weight: bold;">Data de Nascimento do Cônjuge:</label>
+                    <input type="date" class="form-control form-control-lg" id="data_nascimento_conjuge" name="data_nascimento_conjuge" required>
+                    <div class="invalid-feedback" style="font-size: 1.1rem;">Por favor, insira a data de nascimento do cônjuge.</div>
+                </div>
 
-        <!-- CPF e RG do Cônjuge -->
-        <div class="mb-4">
-            <label for="cpf_conjuge" class="form-label">CPF do Cônjuge:</label>
-            <input type="text" class="form-control form-control-lg" id="cpf_conjuge" name="cpf_conjuge" required>
-            <div class="invalid-feedback">Por favor, insira o CPF do cônjuge.</div>
-        </div>
+                <!-- CPF -->
+                <div class="col-md-6 mb-3">
+                    <label for="cpf_conjuge" class="form-label" style="font-size: 1.2rem; font-weight: bold;">CPF do Cônjuge:</label>
+                    <input type="text" class="form-control form-control-lg" id="cpf_conjuge" name="cpf_conjuge" required>
+                    <div class="invalid-feedback" style="font-size: 1.1rem;">Por favor, insira o CPF do cônjuge.</div>
+                </div>
 
-        <div class="mb-4">
-            <label for="rg_conjuge" class="form-label">RG do Cônjuge:</label>
-            <input type="text" class="form-control form-control-lg" id="rg_conjuge" name="rg_conjuge" required>
-            <div class="invalid-feedback">Por favor, insira o RG do cônjuge.</div>
-        </div>
+                <!-- RG -->
+                <div class="col-md-6 mb-3">
+                    <label for="rg_conjuge" class="form-label" style="font-size: 1.2rem; font-weight: bold;">RG do Cônjuge:</label>
+                    <input type="text" class="form-control form-control-lg" id="rg_conjuge" name="rg_conjuge" required>
+                    <div class="invalid-feedback" style="font-size: 1.1rem;">Por favor, insira o RG do cônjuge.</div>
+                </div>
 
-        <!-- Campo para idade do cônjuge, preenchido automaticamente -->
-        <div class="mb-4">
-            <label for="idade_conjuge" class="form-label">Idade do Cônjuge:</label>
-            <input type="number" class="form-control" id="idade_conjuge" name="idade_conjuge" readonly>
+                <!-- Campo para idade do cônjuge, preenchido automaticamente -->
+                <div class="col-md-6 mb-3">
+                    <label for="idade_conjuge" class="form-label" style="font-size: 1.2rem; font-weight: bold;">Idade do Cônjuge:</label>
+                    <input type="number" class="form-control form-control-lg" id="idade_conjuge" name="idade_conjuge" readonly>
+                </div>
+            </div>
         </div>
 
         <button type="submit" class="btn btn-primary btn-lg w-100">Cadastrar Cônjuge</button>

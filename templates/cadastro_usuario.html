@@ -4,111 +4,120 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h2 class="text-center mb-4">Cadastro de Usuário</h2>
+    <h2 class="text-center mb-4" style="font-size: 2rem; font-weight: bold; letter-spacing: 0.05rem;">Cadastro de Usuário</h2>
 
     <form action="{{ url_for('cadastro_usuario') }}" method="POST" class="needs-validation form-uppercase" novalidate>
-        <!-- Nome -->
-        <div class="mb-4">
-            <label for="nome" class="form-label">Nome:</label>
-            <input type="text" class="form-control form-control-lg" id="nome" name="nome" required>
-            <div class="invalid-feedback">Por favor, insira o nome.</div>
-        </div>
-
-        <div class="mb-4">
-            <label for="data_nascimento" class="form-label">Data de Nascimento:</label>
-            <input type="date" class="form-control form-control-lg" id="data_nascimento" name="data_nascimento" required>
-            <div class="invalid-feedback">Por favor, insira a data de nascimento.</div>
-        </div>
-
-        <!-- CPF e RG -->
-        <div class="mb-4">
-            <label for="cpf" class="form-label">CPF:</label>
-            <input type="text" class="form-control form-control-lg" id="cpf" name="cpf" required>
-            <div class="invalid-feedback">Por favor, insira o CPF.</div>
-        </div>
-
-        <div class="mb-4">
-            <label for="rg" class="form-label">RG:</label>
-            <input type="text" class="form-control form-control-lg" id="rg" name="rg" required>
-            <div class="invalid-feedback">Por favor, insira o RG.</div>
-        </div>
         
-        <!-- Informações de Endereço -->
+        <!-- Box para informações pessoais do usuário -->
         <div class="card p-4 mb-4">
-            <h5 class="card-title">Endereço</h5>
+            <h5 class="card-title" style="font-size: 1.5rem; font-weight: bold; color: #0d6efd;">Informações Pessoais</h5>
             <div class="row">
-                <!-- Rua -->
+                <!-- Nome -->
                 <div class="col-md-6 mb-3">
-                    <label for="rua" class="form-label">Rua:</label>
-                    <input type="text" class="form-control form-control-lg" id="rua" name="rua" required>
-                    <div class="invalid-feedback">Por favor, insira a rua.</div>
+                    <label for="nome" class="form-label" style="font-size: 1.2rem; font-weight: bold;">Nome:</label>
+                    <input type="text" class="form-control form-control-lg" id="nome" name="nome" required>
+                    <div class="invalid-feedback" style="font-size: 1.1rem;">Por favor, insira o nome.</div>
                 </div>
 
-                <!-- Número -->
-                <div class="col-md-3 mb-3">
-                    <label for="numero" class="form-label">Número:</label>
-                    <input type="text" class="form-control form-control-lg" id="numero" name="numero" required>
-                    <div class="invalid-feedback">Por favor, insira o número.</div>
+                <!-- Data de Nascimento -->
+                <div class="col-md-6 mb-3">
+                    <label for="data_nascimento" class="form-label" style="font-size: 1.2rem; font-weight: bold;">Data de Nascimento:</label>
+                    <input type="date" class="form-control form-control-lg" id="data_nascimento" name="data_nascimento" required>
+                    <div class="invalid-feedback" style="font-size: 1.1rem;">Por favor, insira a data de nascimento.</div>
                 </div>
 
-                <!-- Bairro -->
+                <!-- CPF -->
                 <div class="col-md-6 mb-3">
-                    <label for="bairro" class="form-label">Bairro:</label>
-                    <input type="text" class="form-control form-control-lg" id="bairro" name="bairro" required>
-                    <div class="invalid-feedback">Por favor, insira o bairro.</div>
+                    <label for="cpf" class="form-label" style="font-size: 1.2rem; font-weight: bold;">CPF:</label>
+                    <input type="text" class="form-control form-control-lg" id="cpf" name="cpf" required>
+                    <div class="invalid-feedback" style="font-size: 1.1rem;">Por favor, insira o CPF.</div>
                 </div>
 
-                <!-- Cidade -->
+                <!-- RG -->
                 <div class="col-md-6 mb-3">
-                    <label for="cidade" class="form-label">Cidade:</label>
-                    <input type="text" class="form-control form-control-lg" id="cidade" name="cidade" required>
-                    <div class="invalid-feedback">Por favor, insira a cidade.</div>
+                    <label for="rg" class="form-label" style="font-size: 1.2rem; font-weight: bold;">RG:</label>
+                    <input type="text" class="form-control form-control-lg" id="rg" name="rg" required>
+                    <div class="invalid-feedback" style="font-size: 1.1rem;">Por favor, insira o RG.</div>
+                </div>
+
+                <!-- Telefone -->
+                <div class="col-md-6 mb-3">
+                    <label for="telefone" class="form-label" style="font-size: 1.2rem; font-weight: bold;">Telefone:</label>
+                    <input type="tel" class="form-control form-control-lg" id="telefone" name="telefone" required>
+                    <div class="invalid-feedback" style="font-size: 1.1rem;">Por favor, insira um número de telefone válido no formato (11)98888-9999.</div>
                 </div>
             </div>
         </div>
 
-        <!-- Telefone -->
-        <div class="mb-4">
-            <label for="telefone" class="form-label">Telefone:</label>
-            <input type="tel" class="form-control form-control-lg" id="telefone" name="telefone" required>
-            <div class="invalid-feedback">Por favor, insira um número de telefone válido no formato (11)98888-9999.</div>
+        <!-- Informações de Endereço -->
+        <div class="card p-4 mb-4">
+            <h5 class="card-title" style="font-size: 1.5rem; font-weight: bold; color: #0d6efd;">Endereço</h5>
+            <div class="row">
+                <!-- Rua -->
+                <div class="col-md-6 mb-3">
+                    <label for="rua" class="form-label" style="font-size: 1.2rem; font-weight: bold;">Rua:</label>
+                    <input type="text" class="form-control form-control-lg" id="rua" name="rua" required>
+                    <div class="invalid-feedback" style="font-size: 1.1rem;">Por favor, insira a rua.</div>
+                </div>
+
+                <!-- Número -->
+                <div class="col-md-3 mb-3">
+                    <label for="numero" class="form-label" style="font-size: 1.2rem; font-weight: bold;">Número:</label>
+                    <input type="text" class="form-control form-control-lg" id="numero" name="numero" required>
+                    <div class="invalid-feedback" style="font-size: 1.1rem;">Por favor, insira o número.</div>
+                </div>
+
+                <!-- Bairro -->
+                <div class="col-md-6 mb-3">
+                    <label for="bairro" class="form-label" style="font-size: 1.2rem; font-weight: bold;">Bairro:</label>
+                    <input type="text" class="form-control form-control-lg" id="bairro" name="bairro" required>
+                    <div class="invalid-feedback" style="font-size: 1.1rem;">Por favor, insira o bairro.</div>
+                </div>
+
+                <!-- Cidade -->
+                <div class="col-md-6 mb-3">
+                    <label for="cidade" class="form-label" style="font-size: 1.2rem; font-weight: bold;">Cidade:</label>
+                    <input type="text" class="form-control form-control-lg" id="cidade" name="cidade" required>
+                    <div class="invalid-feedback" style="font-size: 1.1rem;">Por favor, insira a cidade.</div>
+                </div>
+            </div>
         </div>
 
         <!-- Informações Familiares -->
         <div class="card p-4 mb-4">
-            <h5 class="card-title">Informações Familiares</h5>
+            <h5 class="card-title" style="font-size: 1.5rem; font-weight: bold; color: #0d6efd;">Informações Familiares</h5>
 
             <!-- Possui filhos -->
             <div class="form-check form-switch mb-3">
                 <input class="form-check-input form-check-lg" type="checkbox" id="filhos_switch" name="filhos" value="sim">
-                <label class="form-check-label" for="filhos_switch">Possui filhos?</label>
+                <label class="form-check-label" for="filhos_switch" style="font-size: 1.2rem;">Possui filhos?</label>
             </div>
 
             <!-- Possui cônjuge -->
             <div class="form-check form-switch">
                 <input class="form-check-input form-check-lg" type="checkbox" id="conjuge_switch" name="conjuge" value="sim">
-                <label class="form-check-label" for="conjuge_switch">Possui cônjuge?</label>
+                <label class="form-check-label" for="conjuge_switch" style="font-size: 1.2rem;">Possui cônjuge?</label>
             </div>
         </div>
 
         <!-- Possui Bolsa Família -->
         <div class="mb-4">
-            <label class="form-label">Possui Bolsa Família?</label><br>
+            <label class="form-label" style="font-size: 1.2rem; font-weight: bold;">Possui Bolsa Família?</label><br>
             <div class="form-check form-check-inline">
                 <input type="radio" class="form-check-input" id="bolsa_sim" name="bolsa_familia" value="sim" checked>
-                <label class="form-check-label" for="bolsa_sim">Sim</label>
+                <label class="form-check-label" for="bolsa_sim" style="font-size: 1.2rem;">Sim</label>
             </div>
             <div class="form-check form-check-inline">
                 <input type="radio" class="form-check-input" id="bolsa_nao" name="bolsa_familia" value="nao">
-                <label class="form-check-label" for="bolsa_nao">Não</label>
+                <label class="form-check-label" for="bolsa_nao" style="font-size: 1.2rem;">Não</label>
             </div>
         </div>
 
         <!-- Última data de retirada da cesta básica -->
         <div class="mb-4">
-            <label for="data_cesta" class="form-label">Última data de retirada da cesta básica:</label>
+            <label for="data_cesta" class="form-label" style="font-size: 1.2rem; font-weight: bold;">Última data de retirada da cesta básica:</label>
             <input type="date" class="form-control form-control-lg" id="data_cesta" name="data_cesta" required>
-            <div class="invalid-feedback">Por favor, insira a data de retirada da cesta básica.</div>
+            <div class="invalid-feedback" style="font-size: 1.1rem;">Por favor, insira a data de retirada da cesta básica.</div>
         </div>
 
         <button type="submit" class="btn btn-primary btn-lg w-100">Cadastrar</button>
