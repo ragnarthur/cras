@@ -100,28 +100,27 @@
         <!-- Switch para adicionar filho -->
         <div class="form-check form-switch mb-3">
             <input class="form-check-input" type="checkbox" id="adicionar_filho_switch" name="adicionar_filho">
-            <label class="form-check-label" for="adicionar_filho_switch"
             <label class="form-check-label" for="adicionar_filho_switch" style="font-size: 1.2rem;">Adicionar filho</label>
         </div>
 
         <!-- Formulário dinâmico de filho -->
         <div id="filho_form_card" class="card p-3 mb-4" style="display: none;">
-            <h5 class="card-title" style="font-size: 1.3rem;">Informações do Filho</h5>
+            <h5 class="card-title" style="font-size: 1.3rem; font-weight: bold;">Informações do Filho</h5>
             <div class="mb-3">
                 <label for="nome_filho" class="form-label" style="font-size: 1.2rem; font-weight: bold;">Nome do Filho</label>
-                <input type="text" class="form-control form-control-lg" id="nome_filho" name="nome_filho" required style="text-transform: uppercase;">
+                <input type="text" class="form-control form-control-lg" id="nome_filho" name="nome_filho" style="text-transform: uppercase;">
             </div>
             <div class="mb-3">
                 <label for="cpf_filho" class="form-label" style="font-size: 1.2rem; font-weight: bold;">CPF do Filho</label>
-                <input type="text" class="form-control form-control-lg" id="cpf_filho" name="cpf_filho" maxlength="14" required>
+                <input type="text" class="form-control form-control-lg" id="cpf_filho" name="cpf_filho" maxlength="14">
             </div>
             <div class="mb-3">
                 <label for="rg_filho" class="form-label" style="font-size: 1.2rem; font-weight: bold;">RG do Filho</label>
-                <input type="text" class="form-control form-control-lg" id="rg_filho" name="rg_filho" maxlength="12" required>
+                <input type="text" class="form-control form-control-lg" id="rg_filho" name="rg_filho" maxlength="12">
             </div>
             <div class="mb-3">
                 <label for="data_nascimento_filho" class="form-label" style="font-size: 1.2rem; font-weight: bold;">Data de Nascimento do Filho</label>
-                <input type="date" class="form-control form-control-lg" id="data_nascimento_filho" name="data_nascimento_filho" required>
+                <input type="date" class="form-control form-control-lg" id="data_nascimento_filho" name="data_nascimento_filho">
             </div>
         </div>
 
@@ -133,22 +132,22 @@
 
         <!-- Formulário dinâmico de cônjuge -->
         <div id="conjuge_form_card" class="card p-3 mb-4" style="display: none;">
-            <h5 class="card-title" style="font-size: 1.3rem;">Informações do Cônjuge</h5>
+            <h5 class="card-title" style="font-size: 1.3rem; font-weight: bold;">Informações do Cônjuge</h5>
             <div class="mb-3">
                 <label for="nome_conjuge" class="form-label" style="font-size: 1.2rem; font-weight: bold;">Nome do Cônjuge</label>
-                <input type="text" class="form-control form-control-lg" id="nome_conjuge" name="nome_conjuge" required style="text-transform: uppercase;">
+                <input type="text" class="form-control form-control-lg" id="nome_conjuge" name="nome_conjuge" style="text-transform: uppercase;">
             </div>
             <div class="mb-3">
                 <label for="cpf_conjuge" class="form-label" style="font-size: 1.2rem; font-weight: bold;">CPF do Cônjuge</label>
-                <input type="text" class="form-control form-control-lg" id="cpf_conjuge" name="cpf_conjuge" maxlength="14" required>
+                <input type="text" class="form-control form-control-lg" id="cpf_conjuge" name="cpf_conjuge" maxlength="14">
             </div>
             <div class="mb-3">
                 <label for="rg_conjuge" class="form-label" style="font-size: 1.2rem; font-weight: bold;">RG do Cônjuge</label>
-                <input type="text" class="form-control form-control-lg" id="rg_conjuge" name="rg_conjuge" maxlength="12" required>
+                <input type="text" class="form-control form-control-lg" id="rg_conjuge" name="rg_conjuge" maxlength="12">
             </div>
             <div class="mb-3">
                 <label for="data_nascimento_conjuge" class="form-label" style="font-size: 1.2rem; font-weight: bold;">Data de Nascimento do Cônjuge</label>
-                <input type="date" class="form-control form-control-lg" id="data_nascimento_conjuge" name="data_nascimento_conjuge" required>
+                <input type="date" class="form-control form-control-lg" id="data_nascimento_conjuge" name="data_nascimento_conjuge">
             </div>
         </div>
 
@@ -162,7 +161,13 @@
                         {% for obs in observacoes %}
                         <li class="list-group-item d-flex justify-content-between align-items-start border-0">
                             <div class="ms-2 me-auto">
-                                <span class="badge bg-primary rounded-pill">{{ obs.data_observacao.strftime('%d/%m/%Y') }}</span>
+                                <span class="badge bg-primary rounded-pill">
+                                    {% if obs.data_observacao is string %}
+                                        {{ obs.data_observacao }} <!-- Exibe a string se já estiver no formato certo -->
+                                    {% else %}
+                                        {{ obs.data_observacao.strftime('%d/%m/%Y') }} <!-- Converte para data se necessário -->
+                                    {% endif %}
+                                </span>
                                 <div class="fw-bold mt-1">{{ obs.observacao }}</div>
                             </div>
                         </li>
@@ -174,6 +179,7 @@
             <p class="text-muted" style="font-size: 1.1rem;">Sem observações anteriores.</p>
             {% endif %}
         </div>
+        
 
         <!-- Campo para adicionar nova observação -->
         <div class="mb-4">

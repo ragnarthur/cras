@@ -16,28 +16,6 @@ def connect_db():
 def before_request():
     g.db = connect_db()
 
-# Função para garantir que a tabela 'observacoes' seja criada
-def criar_tabela_observacoes():
-    with g.db:
-        cursor = g.db.cursor()
-        cursor.execute("""
-        CREATE TABLE IF NOT EXISTS observacoes (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            usuario_id INTEGER,
-            gestante_id INTEGER,
-            data_observacao TEXT,
-            observacao TEXT,
-            FOREIGN KEY(usuario_id) REFERENCES usuarios(id),
-            FOREIGN KEY(gestante_id) REFERENCES gestantes(id)
-        )
-        """)
-        g.db.commit()
-
-# Chamar a função de criação de tabela antes de cada requisição
-@app.before_request
-def check_tables():
-    criar_tabela_observacoes()
-
 # Depois de cada requisição, fechar a conexão com o banco de dados
 @app.teardown_request
 def teardown_request(exception):
@@ -63,6 +41,12 @@ def format_data(data_str):
         return data.strftime('%d/%m/%Y')
     except ValueError:
         return data_str
+
+@app.template_filter('datetimeformat')
+def datetimeformat(value, format='%d/%m/%Y'):
+    if isinstance(value, str):
+        value = datetime.strptime(value, '%Y-%m-%d')
+    return value.strftime(format)
 
 # Rota de login
 @app.route('/', methods=['GET', 'POST'])
@@ -419,8 +403,6 @@ def editar_gestante(gestante_id):
             data_parto = ?, bolsa_familia = ?, data_cesta = ? WHERE id = ?
         """, (nome, data_nascimento, cpf, rg, endereco, telefone, data_parto, bolsa_familia, data_cesta, gestante_id))
 
-        g.db.commit()
-
         # Verificar e adicionar filho, cônjuge se necessário
         if request.form.get('adicionar_filho'):
             nome_filho = request.form['nome_filho']
@@ -446,46 +428,24 @@ def editar_gestante(gestante_id):
 
         g.db.commit()
 
-        return redirect(url_for('pesquisar_gestantes'))
+        # Exibir a mensagem de sucesso e redirecionar para o dashboard
+        flash("Alterações realizadas com sucesso!", "success")
+        return redirect(url_for('dashboard'))
 
-    # Carregar observações, filhos e cônjuge
-    cursor.execute("SELECT * FROM filhos WHERE usuario_id = ?", (gestante['id'],))
+    cursor.execute("SELECT * FROM filhos WHERE usuario_id = ?", (gestante_id,))
     filhos = cursor.fetchall()
 
-    cursor.execute("SELECT * FROM conjuge WHERE usuario_id = ?", (gestante['id'],))
+    cursor.execute("SELECT * FROM conjuge WHERE usuario_id = ?", (gestante_id,))
     conjuge = cursor.fetchone()
 
-    cursor.execute("SELECT id, observacao, data_observacao, data_atualizacao FROM observacoes WHERE usuario_id = ?", (gestante['id'],))
+    cursor.execute("SELECT * FROM observacoes WHERE usuario_id = ?", (gestante_id,))
     observacoes = cursor.fetchall()
-
-    observacoes_corrigidas = []
-    for observacao in observacoes:
-        observacao_dict = dict(observacao)
-
-        if observacao_dict['data_observacao']:
-            observacao_dict['data_observacao'] = datetime.strptime(observacao_dict['data_observacao'], '%Y-%m-%d')
-        if observacao_dict['data_atualizacao']:
-            observacao_dict['data_atualizacao'] = datetime.strptime(observacao_dict['data_atualizacao'], '%Y-%m-%d')
-
-        observacoes_corrigidas.append(observacao_dict)
-
-    seis_meses_atras = datetime.now() - timedelta(days=180)
-    for observacao in observacoes_corrigidas:
-        if observacao['data_atualizacao'] and observacao['data_atualizacao'] < seis_meses_atras:
-            flash(f"A observação de {gestante['nome']} não foi atualizada há mais de 6 meses.", 'warning')
-
-    if gestante['data_cesta']:
-        ultima_data_cesta = datetime.strptime(gestante['data_cesta'], '%Y-%m-%d')
-        data_proxima_retirada = ultima_data_cesta + timedelta(days=30)
-    else:
-        data_proxima_retirada = None
 
     return render_template('editar_gestante.html', 
                            gestante=gestante, 
                            filhos=filhos, 
                            conjuge=conjuge, 
-                           observacoes=observacoes_corrigidas, 
-                           data_proxima_retirada=data_proxima_retirada)
+                           observacoes=observacoes)
 
 # Rotas de Pesquisa de Usuários e Gestantes
 @app.route('/pesquisar_usuario', methods=['GET', 'POST'])

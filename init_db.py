@@ -40,21 +40,19 @@ CREATE TABLE IF NOT EXISTS conjuge (
     FOREIGN KEY(usuario_id) REFERENCES usuarios(id)
 )
 ''')
+
+# Criação da tabela de observações (movida do backend para o script de inicialização)
 cursor.execute('''
-CREATE TABLE IF NOT EXISTS usuarios (
+CREATE TABLE IF NOT EXISTS observacoes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    nome TEXT NOT NULL,
-    endereco TEXT NOT NULL,
-    telefone TEXT NOT NULL,
-    filhos TEXT,
-    conjuge TEXT,
-    bolsa_familia TEXT NOT NULL,
-    data_nascimento DATE,
-    data_cesta DATE,
-    observacoes_visita TEXT
+    usuario_id INTEGER,
+    gestante_id INTEGER,
+    data_observacao TEXT,
+    observacao TEXT,
+    FOREIGN KEY(usuario_id) REFERENCES usuarios(id),
+    FOREIGN KEY(gestante_id) REFERENCES gestantes(id)
 )
 ''')
-
 
 # Criação da tabela de secretárias
 cursor.execute('''
